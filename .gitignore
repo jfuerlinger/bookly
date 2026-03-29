@@ -1,5 +1,3 @@
-prompts/
-
 .vscode/*
 !.vscode/settings.json
 !.vscode/tasks.json
@@ -74,7 +72,8 @@ nunit-*.xml
 __MACOSX/
 .AppleDouble
 .LSOverride
-Icon[]
+Icon[
+]
 
 # Thumbnails
 ._*
