@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookly.Ui.E2E", "tests\Book
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookly.Api.Tests", "tests\Bookly.Api.Tests\Bookly.Api.Tests.csproj", "{8D6FBF0D-CBBD-49D5-88C2-2F276ECB5B2F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bookly.Api.Integration.Tests", "tests\Bookly.Api.Integration.Tests\Bookly.Api.Integration.Tests.csproj", "{BE4938AA-57D6-44EA-9A5E-52C5049046F4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -143,6 +145,18 @@ Global
 		{8D6FBF0D-CBBD-49D5-88C2-2F276ECB5B2F}.Release|x64.Build.0 = Release|Any CPU
 		{8D6FBF0D-CBBD-49D5-88C2-2F276ECB5B2F}.Release|x86.ActiveCfg = Release|Any CPU
 		{8D6FBF0D-CBBD-49D5-88C2-2F276ECB5B2F}.Release|x86.Build.0 = Release|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Debug|x64.Build.0 = Debug|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Debug|x86.Build.0 = Debug|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Release|x64.ActiveCfg = Release|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Release|x64.Build.0 = Release|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Release|x86.ActiveCfg = Release|Any CPU
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -157,5 +171,6 @@ Global
 		{8B120413-0BE8-4612-B932-444EA1FBE536} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{190748AD-25B3-4B8B-988A-C074F8DBCDAF} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 		{8D6FBF0D-CBBD-49D5-88C2-2F276ECB5B2F} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
+		{BE4938AA-57D6-44EA-9A5E-52C5049046F4} = {0AB3BF05-4346-4AA6-1389-037BE0695223}
 	EndGlobalSection
 EndGlobal
