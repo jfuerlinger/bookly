@@ -9,7 +9,7 @@ namespace Bookly.Ui.E2E;
 [TestFixture]
 public class ScalarDocsTests : PageTest
 {
-    private string ApiBaseUrl => Environment.GetEnvironmentVariable("BOOKLY_API_URL") ?? "http://localhost:5000";
+    private string ApiBaseUrl => Environment.GetEnvironmentVariable("BOOKLY_API_URL") ?? "http://localhost:5199";
 
     public override BrowserNewContextOptions ContextOptions()
     {

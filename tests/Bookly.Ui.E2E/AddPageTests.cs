@@ -6,7 +6,7 @@ namespace Bookly.Ui.E2E;
 [TestFixture]
 public class AddPageTests : PageTest
 {
-    private string BaseUrl => Environment.GetEnvironmentVariable("BOOKLY_UI_URL") ?? "http://localhost:5002";
+    private string BaseUrl => Environment.GetEnvironmentVariable("BOOKLY_UI_URL") ?? "http://localhost:5044";
 
     public override BrowserNewContextOptions ContextOptions()
     {
@@ -30,7 +30,7 @@ public class AddPageTests : PageTest
     {
         await Page.GotoAsync($"{BaseUrl}/add");
 
-        await Expect(Page.Locator("h1")).ToHaveTextAsync("Addition");
+        await Expect(Page.Locator(".add-title")).ToHaveTextAsync("Add to Collection");
 
         await FillNumber("#numberA", "3");
         await FillNumber("#numberB", "5");

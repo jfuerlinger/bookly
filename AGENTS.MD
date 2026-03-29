@@ -6,6 +6,10 @@ Diese Datei definiert verbindliche Regeln fuer AI- und Human-Agents, die an dies
 ## Geltungsbereich
 Diese Regeln gelten fuer das gesamte Repository, inklusive AppHost, ServiceDefaults, API-Services, Worker, Frontend, IaC und Tests.
 
+## Lokale Runtime-Vorgabe
+1. Fuer Container-basierte lokale Workflows ist in diesem Repository **Podman statt Docker** zu verwenden.
+2. Bestehende Docker-Befehle und -Annahmen sind auf Podman zu uebertragen.
+
 ## Core Principles
 1. Liefere nur produktionsreife Aenderungen, keine Demo-Loesungen.
 2. Behalte bestehende Architektur- und Naming-Konventionen bei.
@@ -91,6 +95,7 @@ Diese Regeln gelten fuer das gesamte Repository, inklusive AppHost, ServiceDefau
 3. Flaky Tests sind sofort zu stabilisieren oder temporaer zu quarantainen mit Ticket.
 4. Sicherheitskritische und performancekritische Pfade explizit testen.
 5. Führe E2E-Tests nur nach meiner expliziten Aufforderung durch!
+6. Anleitung zur Durchfuehrung der E2E-Tests (inkl. was zu starten ist): [docs/e2e-tests.md](docs/e2e-tests.md).
 
 ## Observability und Betrieb
 1. Jeder Service emittiert:
