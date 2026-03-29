@@ -1,4 +1,5 @@
 using Bookly.Core.Entities;
+using Bookly.Core.Models;
 
 namespace Bookly.Cli.Output;
 
@@ -39,6 +40,26 @@ public sealed class BookTableFormatter : IFormatter<Book>
             sb.AppendLine("│" + string.Join("│", row.Select((c, i) => $" {c.PadRight(colWidths[i])} ")) + "│");
         sb.Append(bot);
         return sb.ToString();
+    }
+}
+
+public sealed class BookDtoTableFormatter : IFormatter<BookDto>
+{
+    public string Format(IEnumerable<BookDto> items)
+    {
+        var books = items.ToList();
+        if (books.Count == 0)
+            return "No books found.";
+
+        var rows = books.Select(b => new[]
+        {
+            b.Id.ToString(),
+            b.NormalizedIsbn,
+            b.Title.Length > 40 ? b.Title[..37] + "..." : b.Title,
+            string.Join(", ", b.Authors)
+        }).ToList();
+
+        return BookTableFormatter.FormatTable(["Id", "ISBN", "Title", "Authors"], rows);
     }
 }
 

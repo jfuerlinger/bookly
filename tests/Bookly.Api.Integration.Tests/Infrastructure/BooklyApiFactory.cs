@@ -57,6 +57,7 @@ public sealed class BooklyApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<IBookRepository>();
             services.RemoveAll<IAuthorRepository>();
             services.RemoveAll<IAddBookUseCase>();
+            services.RemoveAll<IListBooksUseCase>();
 
             services.AddTransient<IBookMetadataProvider, StubMetadataProvider>();
             services.AddScoped<BookLookupOrchestrator>();
@@ -64,6 +65,7 @@ public sealed class BooklyApiFactory : WebApplicationFactory<Program>
             services.AddScoped<IBookRepository, BookRepository>();
             services.AddScoped<IAuthorRepository, AuthorRepository>();
             services.AddScoped<IAddBookUseCase, AddBookUseCase>();
+            services.AddScoped<IListBooksUseCase, ListBooksUseCase>();
         });
     }
 

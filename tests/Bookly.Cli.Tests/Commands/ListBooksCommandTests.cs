@@ -1,69 +1,83 @@
 using Bookly.Cli.Commands.Books;
-using Bookly.Core.Data;
-using Bookly.Core.Entities;
-using Bookly.Core.Services;
-using Microsoft.EntityFrameworkCore;
+using Bookly.Core.Models;
+using Bookly.Core.UseCases;
+using Moq;
 
 namespace Bookly.Cli.Tests.Commands;
 
-public class ListBooksCommandTests : IAsyncLifetime
+public class ListBooksCommandTests
 {
-    private BooklyDbContext _dbContext = null!;
-    private BookRepository _repository = null!;
-    private ListBooksCommand _command = null!;
+    private readonly Mock<IListBooksUseCase> _useCase = new();
+    private readonly ListBooksCommand _command;
 
-    public async Task InitializeAsync()
+    public ListBooksCommandTests()
     {
-        var opts = new DbContextOptionsBuilder<BooklyDbContext>()
-            .UseInMemoryDatabase($"list-test-{Guid.NewGuid()}")
-            .Options;
-        _dbContext = new BooklyDbContext(opts);
-        await _dbContext.Database.EnsureCreatedAsync();
-        _repository = new BookRepository(_dbContext);
-        _command = new ListBooksCommand(_repository);
+        _command = new ListBooksCommand(_useCase.Object);
     }
 
     [Fact]
-    public async Task ListBooks_EmptyDb_ExitCode0()
+    public async Task ListBooks_EmptyResult_ExitCode0()
     {
+        _useCase.Setup(u => u.ExecuteAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
         var exitCode = await _command.ExecuteAsync([], CancellationToken.None);
+
         Assert.Equal(0, exitCode);
     }
 
     [Fact]
     public async Task ListBooks_WithBooks_ExitCode0()
     {
-        await _repository.CreateBookAsync(new Book
-        {
-            Title = "Test Book",
-            NormalizedIsbn = "9780306406157",
-            MetadataSource = "test",
-            CreatedAtUtc = DateTime.UtcNow,
-            UpdatedAtUtc = DateTime.UtcNow,
-        });
-        await _dbContext.SaveChangesAsync();
+        _useCase.Setup(u => u.ExecuteAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([MakeBook("Test Book", "9780306406157", ["Author One"])]);
 
         var exitCode = await _command.ExecuteAsync([], CancellationToken.None);
+
         Assert.Equal(0, exitCode);
     }
 
     [Fact]
     public async Task ListBooks_JsonFormat_ExitCode0()
     {
+        _useCase.Setup(u => u.ExecuteAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
         var exitCode = await _command.ExecuteAsync(["--output", "json"], CancellationToken.None);
+
         Assert.Equal(0, exitCode);
     }
 
     [Fact]
-    public async Task ListBooks_PaginationArgs_ExitCode0()
+    public async Task ListBooks_PaginationArgs_PassedToUseCase()
     {
-        var exitCode = await _command.ExecuteAsync(["--skip", "0", "--take", "5"], CancellationToken.None);
-        Assert.Equal(0, exitCode);
+        _useCase.Setup(u => u.ExecuteAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync([]);
+
+        await _command.ExecuteAsync(["--skip", "5", "--take", "15"], CancellationToken.None);
+
+        _useCase.Verify(u => u.ExecuteAsync(5, 15, It.IsAny<CancellationToken>()), Times.Once);
     }
 
-    public async Task DisposeAsync()
+    [Fact]
+    public async Task ListBooks_UseCaseThrows_ReturnsExitCode2()
     {
-        await _dbContext.Database.EnsureDeletedAsync();
-        await _dbContext.DisposeAsync();
+        _useCase.Setup(u => u.ExecuteAsync(It.IsAny<int>(), It.IsAny<int>(), It.IsAny<CancellationToken>()))
+            .ThrowsAsync(new InvalidOperationException("db error"));
+
+        var exitCode = await _command.ExecuteAsync([], CancellationToken.None);
+
+        Assert.Equal(2, exitCode);
     }
+
+    private static BookDto MakeBook(string title, string isbn, List<string> authors) => new()
+    {
+        Id = 1,
+        Title = title,
+        NormalizedIsbn = isbn,
+        Authors = authors,
+        MetadataSource = "test",
+    };
 }
+
+

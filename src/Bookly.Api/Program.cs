@@ -30,6 +30,7 @@ builder.Services.AddScoped<IIsbnMetadataService, IsbnMetadataService>();
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 builder.Services.AddScoped<IAddBookUseCase, AddBookUseCase>();
+builder.Services.AddScoped<IListBooksUseCase, ListBooksUseCase>();
 
 var app = builder.Build();
 
@@ -57,5 +58,6 @@ app.MapGet("/health", () => Results.Ok("healthy"));
 app.MapGet("/api/add", (int a, int b) => Results.Ok(new { result = MathUtils.Add(a, b) }));
 
 app.MapIsbnScanEndpoints();
+app.MapListBooksEndpoints();
 
 app.Run();

@@ -1,15 +1,15 @@
 using Bookly.Cli.Output;
-using Bookly.Core.Services;
+using Bookly.Core.UseCases;
 
 namespace Bookly.Cli.Commands.Books;
 
-public sealed class ListBooksCommand(IBookRepository repository) : ICommand
+public sealed class ListBooksCommand(IListBooksUseCase listBooksUseCase) : ICommand
 {
     public string Name => "book list";
 
     public async Task<int> ExecuteAsync(string[] args, CancellationToken cancellationToken = default)
     {
-        int skip = 0, take = 10;
+        int skip = 0, take = 20;
         var format = "table";
 
         for (int i = 0; i < args.Length; i++)
@@ -21,12 +21,12 @@ public sealed class ListBooksCommand(IBookRepository repository) : ICommand
 
         try
         {
-            var books = (await repository.GetAllBooksAsync(skip, take, cancellationToken)).ToList();
+            var books = (await listBooksUseCase.ExecuteAsync(skip, take, cancellationToken)).ToList();
             var output = format switch
             {
-                "json" => new JsonFormatter<Bookly.Core.Entities.Book>().Format(books),
+                "json" => new JsonFormatter<Bookly.Core.Models.BookDto>().Format(books),
                 "csv" => new BookCsvFormatter().Format(books),
-                _ => new BookTableFormatter().Format(books)
+                _ => new BookDtoTableFormatter().Format(books)
             };
             Console.WriteLine(output);
             return 0;

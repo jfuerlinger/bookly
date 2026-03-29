@@ -1,4 +1,6 @@
 @page "/"
+@inject IHttpClientFactory HttpClientFactory
+@using System.Net.Http.Json
 
 <PageTitle>Bookly - Your Curated Library</PageTitle>
 
@@ -35,86 +37,101 @@
 
     <!-- Book Grid -->
     <section class="book-grid" aria-label="Your books">
-
-        <!-- Featured Book Card -->
-        <article class="card-featured featured-card">
-            <div class="featured-cover">
-                <div class="featured-cover-placeholder">
-                    <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
-                </div>
-                <span class="chip chip-featured">Featured</span>
+        @if (_isLoading)
+        {
+            <div class="loading-state" role="status" aria-live="polite">
+                <span class="material-symbols-outlined" aria-hidden="true">hourglass_empty</span>
+                <p>Loading your library…</p>
             </div>
-            <div class="featured-info">
-                <div class="featured-meta">
-                    <span class="category-label">Art &amp; Design</span>
-                </div>
-                <h3 class="featured-title">The Modern Aesthetics of Minimalism</h3>
-                <p class="featured-desc">A deep dive into the philosophy of essentialism in 21st-century architectural design and visual arts.</p>
-
-                <div class="featured-footer">
-                    <div class="progress-section">
-                        <span class="progress-label">Progress</span>
-                        <div class="shelf-progress-track">
-                            <div class="shelf-progress-fill" style="width: 65%;"></div>
-                        </div>
+        }
+        else if (_errorMessage is not null)
+        {
+            <div class="error-state" role="alert">
+                <span class="material-symbols-outlined" aria-hidden="true">error_outline</span>
+                <p>@_errorMessage</p>
+            </div>
+        }
+        else if (_books.Count == 0)
+        {
+            <div class="empty-state">
+                <span class="material-symbols-outlined" aria-hidden="true">library_books</span>
+                <p>Your library is empty. Scan an ISBN to add your first book!</p>
+            </div>
+        }
+        else
+        {
+            @foreach (var book in _books)
+            {
+                <article class="card-standard book-card">
+                    <div class="book-cover">
+                        @if (book.CoverMediumUrl is not null)
+                        {
+                            <img src="@book.CoverMediumUrl"
+                                 alt="Cover of @book.Title"
+                                 class="book-cover-image"
+                                 loading="lazy" />
+                        }
+                        else
+                        {
+                            <div class="book-cover-placeholder">
+                                <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
+                            </div>
+                        }
                     </div>
-                    <a href="book/1" class="card-action-btn" aria-label="View details">
-                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
-                    </a>
-                </div>
-            </div>
-        </article>
-
-        <!-- Standard Book Cards -->
-        <article class="card-standard book-card">
-            <div class="book-cover">
-                <div class="book-cover-placeholder cover-warm">
-                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
-                </div>
-                <span class="chip chip-borrowed">Borrowed</span>
-            </div>
-            <div class="book-info">
-                <h4 class="book-title">The Alchemist</h4>
-                <p class="book-author">Paulo Coelho</p>
-            </div>
-        </article>
-
-        <article class="card-standard book-card">
-            <div class="book-cover">
-                <div class="book-cover-placeholder cover-cool">
-                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
-                </div>
-                <span class="chip chip-completed">Completed</span>
-            </div>
-            <div class="book-info">
-                <h4 class="book-title">Digital Renaissance</h4>
-                <p class="book-author">Joel Waldfogel</p>
-            </div>
-        </article>
-
-        <article class="card-standard book-card">
-            <div class="book-cover">
-                <div class="book-cover-placeholder cover-dark">
-                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
-                </div>
-            </div>
-            <div class="book-info">
-                <h4 class="book-title">The Singularity</h4>
-                <p class="book-author">Ray Kurzweil</p>
-            </div>
-        </article>
-
-        <article class="card-standard book-card">
-            <div class="book-cover">
-                <div class="book-cover-placeholder cover-nature">
-                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
-                </div>
-                <span class="chip chip-wishlist">Wishlist</span>
-            </div>
-            <div class="book-info">
-                <h4 class="book-title">Into the Wild</h4>
-                <p class="book-author">Jon Krakauer</p>
-            </div>
-        </article>
+                    <div class="book-info">
+                        <h4 class="book-title">@book.Title</h4>
+                        @if (book.Authors.Count > 0)
+                        {
+                            <p class="book-author">@string.Join(", ", book.Authors)</p>
+                        }
+                    </div>
+                </article>
+            }
+        }
     </section>
 </div>
+
+@code {
+    private List<BookDto> _books = [];
+    private bool _isLoading = true;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("BooklyApi");
+            _books = await client.GetFromJsonAsync<List<BookDto>>("/api/library/books") ?? [];
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Could not load your library. Please try again later.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private sealed record BookDto
+    {
+        public int Id { get; init; }
+        public string? Isbn10 { get; init; }
+        public string? Isbn13 { get; init; }
+        public required string NormalizedIsbn { get; init; }
+        public required string Title { get; init; }
+        public string? Subtitle { get; init; }
+        public List<string> Authors { get; init; } = [];
+        public string? Publisher { get; init; }
+        public string? Language { get; init; }
+        public int? PageCount { get; init; }
+        public string? Description { get; init; }
+        public string? CoverSmallUrl { get; init; }
+        public string? CoverMediumUrl { get; init; }
+        public string? CoverLargeUrl { get; init; }
+        public required string MetadataSource { get; init; }
+        public DateTime CreatedAtUtc { get; init; }
+        public DateTime UpdatedAtUtc { get; init; }
+    }
+}
+

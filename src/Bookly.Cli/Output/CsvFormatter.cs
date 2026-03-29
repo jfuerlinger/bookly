@@ -1,16 +1,16 @@
-using Bookly.Core.Entities;
+using Bookly.Core.Models;
 
 namespace Bookly.Cli.Output;
 
-public sealed class BookCsvFormatter : IFormatter<Book>
+public sealed class BookCsvFormatter : IFormatter<BookDto>
 {
-    public string Format(IEnumerable<Book> items)
+    public string Format(IEnumerable<BookDto> items)
     {
         var sb = new System.Text.StringBuilder();
         sb.AppendLine("Id,NormalizedIsbn,Title,Authors,Publisher,MetadataSource");
         foreach (var b in items)
         {
-            var authors = string.Join(";", b.BookAuthors.Select(ba => ba.Author?.Name ?? ""));
+            var authors = string.Join(";", b.Authors);
             sb.AppendLine($"{b.Id},{b.NormalizedIsbn},{Escape(b.Title)},{Escape(authors)},{Escape(b.Publisher ?? "")},{b.MetadataSource}");
         }
         return sb.ToString().TrimEnd();

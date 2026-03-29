@@ -34,6 +34,7 @@ builder.Services.AddScoped<BookLookupOrchestrator>();
 builder.Services.AddScoped<IIsbnMetadataService, IsbnMetadataService>();
 
 builder.Services.AddScoped<IAddBookUseCase, AddBookUseCase>();
+builder.Services.AddScoped<IListBooksUseCase, ListBooksUseCase>();
 
 builder.Services.AddScoped<ICommand, AddBookByIsbnCommand>();
 builder.Services.AddScoped<ICommand, AddBookManualCommand>();

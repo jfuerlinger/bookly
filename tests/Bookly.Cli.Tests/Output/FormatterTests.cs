@@ -1,5 +1,6 @@
 using Bookly.Cli.Output;
 using Bookly.Core.Entities;
+using Bookly.Core.Models;
 
 namespace Bookly.Cli.Tests.Output;
 
@@ -13,6 +14,15 @@ public class FormatterTests
         MetadataSource = "test",
         CreatedAtUtc = DateTime.UtcNow,
         UpdatedAtUtc = DateTime.UtcNow,
+    };
+
+    private static BookDto MakeBookDto(int id = 1, string title = "Test Book", string isbn = "9780306406157") => new()
+    {
+        Id = id,
+        Title = title,
+        NormalizedIsbn = isbn,
+        Authors = ["Test Author"],
+        MetadataSource = "test",
     };
 
     [Fact]
@@ -55,7 +65,7 @@ public class FormatterTests
     public void CsvFormatter_Book_ContainsCsvHeaders()
     {
         var formatter = new BookCsvFormatter();
-        var csv = formatter.Format([MakeBook()]);
+        var csv = formatter.Format([MakeBookDto()]);
         Assert.Contains("Id,", csv);
         Assert.Contains("Title", csv);
         Assert.Contains("Test Book", csv);
