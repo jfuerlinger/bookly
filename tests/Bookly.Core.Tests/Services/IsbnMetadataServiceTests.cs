@@ -1,105 +1,63 @@
-using System.Net;
+using Bookly.Core.Models;
 using Bookly.Core.Services;
-using Bookly.Core.Tests.Fixtures;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bookly.Core.Tests.Services;
 
 public class IsbnMetadataServiceTests
 {
-    private static HttpClient CreateClient(HttpStatusCode statusCode, string content)
-    {
-        var handler = new FakeHttpMessageHandler(statusCode, content);
-        return new HttpClient(handler);
-    }
-
     [Fact]
-    public async Task ResolveIsbn_ValidIsbn_FetchesMetadata()
+    public async Task ResolveIsbnAsync_DelegatesToOrchestrator()
     {
-        var openLibraryResponse = $$"""
-        {
-          "ISBN:{{TestData.ValidIsbn13}}": {
-            "title": "Test Book",
-            "authors": [{"name": "Author One"}],
-            "publishers": [{"name": "Test Publisher"}]
-          }
-        }
-        """;
+        var expected = new BookMetadata { Title = "Test Book", Source = "TestProvider" };
+        var provider = new FakeProvider(expected);
+        var orchestrator = new BookLookupOrchestrator(
+            [provider],
+            NullLogger<BookLookupOrchestrator>.Instance);
+        var service = new IsbnMetadataService(orchestrator);
 
-        var client = CreateClient(HttpStatusCode.OK, openLibraryResponse);
-        var service = new IsbnMetadataService(client);
-
-        var result = await service.ResolveIsbnAsync(TestData.ValidIsbn13);
+        var result = await service.ResolveIsbnAsync("9780306406157");
 
         Assert.NotNull(result);
         Assert.Equal("Test Book", result.Title);
-        Assert.Contains("Author One", result.Authors);
+        Assert.Equal("TestProvider", result.Source);
     }
 
     [Fact]
-    public async Task ResolveIsbn_ApiTimeout_UsesFallback()
+    public async Task ResolveIsbnAsync_NoProviderResult_ReturnsNull()
     {
-        var handler = new ThrowingHttpMessageHandler(new HttpRequestException("Timeout"));
-        var client = new HttpClient(handler);
-        var service = new IsbnMetadataService(client, enableFallback: true);
+        var provider = new FakeProvider(null);
+        var orchestrator = new BookLookupOrchestrator(
+            [provider],
+            NullLogger<BookLookupOrchestrator>.Instance);
+        var service = new IsbnMetadataService(orchestrator);
 
-        var result = await service.ResolveIsbnAsync(TestData.ValidIsbn13);
-
-        Assert.NotNull(result);
-        Assert.Equal("[Fallback] Unknown Book", result.Title);
-        Assert.Equal("fallback", result.Source);
-    }
-
-    [Fact]
-    public async Task ResolveIsbn_ApiTimeout_NoFallback_ReturnsNull()
-    {
-        var handler = new ThrowingHttpMessageHandler(new HttpRequestException("Timeout"));
-        var client = new HttpClient(handler);
-        var service = new IsbnMetadataService(client, enableFallback: false);
-
-        var result = await service.ResolveIsbnAsync(TestData.ValidIsbn13);
-
-        Assert.Null(result);
-    }
-
-    [Theory]
-    [InlineData("not-an-isbn")]
-    [InlineData("123")]
-    [InlineData("")]
-    public async Task ResolveIsbn_InvalidIsbn_ReturnsNull(string isbn)
-    {
-        var client = CreateClient(HttpStatusCode.OK, "{}");
-        var service = new IsbnMetadataService(client);
-
-        var result = await service.ResolveIsbnAsync(isbn);
+        var result = await service.ResolveIsbnAsync("9780306406157");
 
         Assert.Null(result);
     }
 
     [Fact]
-    public async Task ResolveIsbn_EmptyResponse_ReturnsFallbackOrNull()
+    public async Task ResolveIsbnAsync_MultipleProviders_FallsBack()
     {
-        var client = CreateClient(HttpStatusCode.OK, "{}");
-        var service = new IsbnMetadataService(client, enableFallback: true);
+        var fallback = new BookMetadata { Title = "Fallback Book", Source = "Secondary" };
+        var primary = new FakeProvider(null);
+        var secondary = new FakeProvider(fallback);
+        var orchestrator = new BookLookupOrchestrator(
+            [primary, secondary],
+            NullLogger<BookLookupOrchestrator>.Instance);
+        var service = new IsbnMetadataService(orchestrator);
 
-        var result = await service.ResolveIsbnAsync(TestData.ValidIsbn13);
+        var result = await service.ResolveIsbnAsync("9780306406157");
 
-        // Empty JSON = no key found = fallback
         Assert.NotNull(result);
-        Assert.Equal("fallback", result.Source);
+        Assert.Equal("Fallback Book", result.Title);
     }
-}
 
-internal class FakeHttpMessageHandler(HttpStatusCode statusCode, string content) : HttpMessageHandler
-{
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        => Task.FromResult(new HttpResponseMessage(statusCode)
-        {
-            Content = new StringContent(content)
-        });
-}
-
-internal class ThrowingHttpMessageHandler(Exception exception) : HttpMessageHandler
-{
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-        => Task.FromException<HttpResponseMessage>(exception);
+    private sealed class FakeProvider(BookMetadata? result) : IBookMetadataProvider
+    {
+        public string SourceName => "Fake";
+        public Task<BookMetadata?> LookupAsync(string isbn, CancellationToken cancellationToken = default)
+            => Task.FromResult(result);
+    }
 }

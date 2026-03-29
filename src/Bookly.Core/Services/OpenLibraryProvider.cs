@@ -1,8 +1,9 @@
 using System.Globalization;
 using System.Text.Json;
-using Bookly.Api.Models;
+using Bookly.Core.Models;
+using Microsoft.Extensions.Logging;
 
-namespace Bookly.Api.Services;
+namespace Bookly.Core.Services;
 
 public sealed class OpenLibraryProvider(
     HttpClient httpClient,

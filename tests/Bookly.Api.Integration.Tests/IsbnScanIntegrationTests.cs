@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Bookly.Api.Integration.Tests.Infrastructure;
 using Bookly.Api.Models;
+using Bookly.Core.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace Bookly.Api.Integration.Tests;

@@ -24,7 +24,7 @@ public sealed class AddBookUseCase : IAddBookUseCase
         _dbContext = dbContext;
     }
 
-    public async Task<Book> ExecuteAsync(
+    public async Task<AddBookResult> ExecuteAsync(
         string isbn,
         string? titleOverride = null,
         IEnumerable<string>? authorOverrides = null,
@@ -32,7 +32,7 @@ public sealed class AddBookUseCase : IAddBookUseCase
     {
         var validation = IsbnValidator.Validate(isbn);
         if (!validation.IsValid)
-            throw new InvalidOperationException($"Invalid ISBN: {validation.Error}");
+            return new AddBookResult { Outcome = AddBookOutcome.ValidationFailed, Error = validation.Error };
 
         var normalizedIsbn = validation.NormalizedIsbn!;
 
@@ -46,10 +46,15 @@ public sealed class AddBookUseCase : IAddBookUseCase
                 await _bookRepository.UpdateBookAsync(existing, cancellationToken);
                 await _dbContext.SaveChangesAsync(cancellationToken);
             }
-            return existing;
+            return new AddBookResult { Outcome = AddBookOutcome.AlreadyExists, Book = existing };
         }
 
         var metadata = await _metadataService.ResolveIsbnAsync(isbn, cancellationToken);
+
+        var hasOverrides = titleOverride is not null || authorOverrides?.Any() == true;
+        if (metadata is null && !hasOverrides)
+            return new AddBookResult { Outcome = AddBookOutcome.MetadataNotFound, Error = $"No metadata found for ISBN '{isbn}' from any provider." };
+
         var title = titleOverride ?? metadata?.Title ?? normalizedIsbn;
         var source = metadata?.Source ?? "manual";
 
@@ -94,6 +99,10 @@ public sealed class AddBookUseCase : IAddBookUseCase
         await _bookRepository.CreateBookAsync(book, cancellationToken);
         await _dbContext.SaveChangesAsync(cancellationToken);
 
-        return (await _bookRepository.GetBookByIsbnAsync(normalizedIsbn, cancellationToken))!;
+        return new AddBookResult
+        {
+            Outcome = AddBookOutcome.Created,
+            Book = (await _bookRepository.GetBookByIsbnAsync(normalizedIsbn, cancellationToken))!
+        };
     }
 }

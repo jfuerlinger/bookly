@@ -1,5 +1,6 @@
-using Bookly.Api.Services;
 using Bookly.Core.Data;
+using Bookly.Core.Services;
+using Bookly.Core.UseCases;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -52,9 +53,17 @@ public sealed class BooklyApiFactory : WebApplicationFactory<Program>
             services.RemoveAll<OpenLibraryProvider>();
             services.RemoveAll<GoogleBooksProvider>();
             services.RemoveAll<BookLookupOrchestrator>();
+            services.RemoveAll<IIsbnMetadataService>();
+            services.RemoveAll<IBookRepository>();
+            services.RemoveAll<IAuthorRepository>();
+            services.RemoveAll<IAddBookUseCase>();
 
             services.AddTransient<IBookMetadataProvider, StubMetadataProvider>();
             services.AddScoped<BookLookupOrchestrator>();
+            services.AddScoped<IIsbnMetadataService, IsbnMetadataService>();
+            services.AddScoped<IBookRepository, BookRepository>();
+            services.AddScoped<IAuthorRepository, AuthorRepository>();
+            services.AddScoped<IAddBookUseCase, AddBookUseCase>();
         });
     }
 

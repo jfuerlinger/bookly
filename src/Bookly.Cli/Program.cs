@@ -26,14 +26,12 @@ builder.Services.AddDbContextPool<BooklyDbContext>(options =>
 builder.Services.AddScoped<IBookRepository, BookRepository>();
 builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
 
-var fallbackEnabled = builder.Configuration.GetValue<bool>("Bookly:IsbnMetadataService:FallbackEnabled", true);
-builder.Services.AddHttpClient("isbn-metadata");
-builder.Services.AddScoped<IIsbnMetadataService>(sp =>
-{
-    var factory = sp.GetRequiredService<IHttpClientFactory>();
-    var client = factory.CreateClient("isbn-metadata");
-    return new IsbnMetadataService(client, enableFallback: fallbackEnabled);
-});
+builder.Services.AddHttpClient<OpenLibraryProvider>(c => c.Timeout = TimeSpan.FromSeconds(10));
+builder.Services.AddHttpClient<GoogleBooksProvider>(c => c.Timeout = TimeSpan.FromSeconds(10));
+builder.Services.AddTransient<IBookMetadataProvider>(sp => sp.GetRequiredService<OpenLibraryProvider>());
+builder.Services.AddTransient<IBookMetadataProvider>(sp => sp.GetRequiredService<GoogleBooksProvider>());
+builder.Services.AddScoped<BookLookupOrchestrator>();
+builder.Services.AddScoped<IIsbnMetadataService, IsbnMetadataService>();
 
 builder.Services.AddScoped<IAddBookUseCase, AddBookUseCase>();
 

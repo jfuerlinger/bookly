@@ -1,7 +1,8 @@
 using Bookly.Api.Endpoints;
-using Bookly.Api.Services;
 using Bookly.Core;
 using Bookly.Core.Data;
+using Bookly.Core.Services;
+using Bookly.Core.UseCases;
 using Microsoft.EntityFrameworkCore;
 using Scalar.AspNetCore;
 
@@ -25,6 +26,10 @@ builder.Services.AddTransient<IBookMetadataProvider>(sp =>
 builder.Services.AddTransient<IBookMetadataProvider>(sp =>
     sp.GetRequiredService<GoogleBooksProvider>());
 builder.Services.AddScoped<BookLookupOrchestrator>();
+builder.Services.AddScoped<IIsbnMetadataService, IsbnMetadataService>();
+builder.Services.AddScoped<IBookRepository, BookRepository>();
+builder.Services.AddScoped<IAuthorRepository, AuthorRepository>();
+builder.Services.AddScoped<IAddBookUseCase, AddBookUseCase>();
 
 var app = builder.Build();
 

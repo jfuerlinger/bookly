@@ -93,6 +93,13 @@ Diese Regeln gelten fuer das gesamte Repository, inklusive AppHost, ServiceDefau
 4. Idempotenz fuer geeignete Schreiboperationen.
 5. Domain-Regeln gehoeren in Domain/Application Layer, nicht in Controller/UI.
 
+## Use-Case-Architektur (Nicht verhandelbar)
+1. Jegliche Geschaeftslogik (Validierung, Deduplizierung, Metadaten-Aufloesung, Entity-Erstellung, Persistenz-Orchestrierung) gehoert in Use Cases in `Bookly.Core/UseCases`.
+2. API-Endpoints sind reine HTTP-Adapter: Request-Parsing, Use-Case-Aufruf, Response-Mapping. Keine Geschaeftslogik.
+3. CLI-Commands sind reine CLI-Adapter: Argument-Parsing, Use-Case-Aufruf, Output-Formatierung. Keine Geschaeftslogik.
+4. Externe Service-Integrationen (Metadata-Provider, etc.) werden als Interfaces in `Bookly.Core/Services` definiert und dort implementiert.
+5. Neue Endpoints/Commands ohne zugehoeriges Use Case in Core sind unvollstaendig.
+
 ## Daten und Persistenz
 1. Migrationen sind deterministisch und rollback-faehig.
 2. Indizes entlang realer Query-Patterns pflegen.
@@ -110,6 +117,11 @@ Diese Regeln gelten fuer das gesamte Repository, inklusive AppHost, ServiceDefau
 4. Sicherheitskritische und performancekritische Pfade explizit testen.
 5. Führe E2E-Tests nur nach meiner expliziten Aufforderung durch!
 6. Anleitung zur Durchfuehrung der E2E-Tests (inkl. was zu starten ist): [docs/e2e-tests.md](docs/e2e-tests.md).
+
+## CLI Skill Synchronisation (Nicht verhandelbar)
+1. Bei jeder Aenderung an `Bookly.Cli` (Commands, Handler, Exit-Codes, Parameter, Output-Formate, Konfiguration oder Ausfuehrungsablauf) muss der zugehoerige CLI-Ausfuehrungs-Skill im selben Change-Set mit aktualisiert werden.
+2. Pull Requests mit CLI-Aenderungen ohne aktualisierten CLI-Skill gelten als unvollstaendig.
+3. Der Skill muss die reale Ausfuehrung weiterhin korrekt abbilden (Build/Run/Verify/Troubleshooting) und darf keine veralteten Befehle enthalten.
 
 ## Observability und Betrieb
 1. Jeder Service emittiert:

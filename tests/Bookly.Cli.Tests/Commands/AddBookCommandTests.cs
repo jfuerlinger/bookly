@@ -1,11 +1,10 @@
-using System.Net;
 using Bookly.Cli.Commands.Books;
-using Bookly.Cli.Tests.Fixtures;
-using Bookly.Cli.Tests.Helpers;
 using Bookly.Core.Data;
+using Bookly.Core.Models;
 using Bookly.Core.Services;
 using Bookly.Core.UseCases;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bookly.Cli.Tests.Commands;
 
@@ -25,8 +24,17 @@ public class AddBookCommandTests_InMemory : IAsyncLifetime
         _bookRepository = new BookRepository(_dbContext);
         var authorRepository = new AuthorRepository(_dbContext);
 
-        var handler = new FakeHttpMessageHandler(HttpStatusCode.OK, "{}");
-        var metadataService = new IsbnMetadataService(new HttpClient(handler), enableFallback: true);
+        // Provider that returns fallback metadata for any ISBN
+        var provider = new FakeProvider(new BookMetadata
+        {
+            Title = "[Fallback] Unknown Book",
+            Authors = [],
+            Source = "fallback"
+        });
+        var orchestrator = new BookLookupOrchestrator(
+            [provider],
+            NullLogger<BookLookupOrchestrator>.Instance);
+        var metadataService = new IsbnMetadataService(orchestrator);
         var useCase = new AddBookUseCase(_bookRepository, authorRepository, metadataService, _dbContext);
         _command = new AddBookByIsbnCommand(useCase);
     }
@@ -73,15 +81,22 @@ public class AddBookCommandTests_InMemory : IAsyncLifetime
         await _dbContext.Database.EnsureDeletedAsync();
         await _dbContext.DisposeAsync();
     }
+
+    private sealed class FakeProvider(BookMetadata? result) : IBookMetadataProvider
+    {
+        public string SourceName => "Fake";
+        public Task<BookMetadata?> LookupAsync(string isbn, CancellationToken cancellationToken = default)
+            => Task.FromResult(result);
+    }
 }
 
-[Collection(nameof(PostgresqlFixtureCollection))]
+[Collection(nameof(Fixtures.PostgresqlFixtureCollection))]
 public class AddBookCommandTests_Postgres : IAsyncLifetime
 {
-    private readonly PostgresqlFixture _fixture;
+    private readonly Fixtures.PostgresqlFixture _fixture;
     private BooklyDbContext _dbContext = null!;
 
-    public AddBookCommandTests_Postgres(PostgresqlFixture fixture)
+    public AddBookCommandTests_Postgres(Fixtures.PostgresqlFixture fixture)
     {
         _fixture = fixture;
     }
@@ -97,8 +112,16 @@ public class AddBookCommandTests_Postgres : IAsyncLifetime
     {
         var bookRepository = new BookRepository(_dbContext);
         var authorRepository = new AuthorRepository(_dbContext);
-        var handler = new FakeHttpMessageHandler(HttpStatusCode.OK, "{}");
-        var metadataService = new IsbnMetadataService(new HttpClient(handler), enableFallback: true);
+        var provider = new FakeProvider(new BookMetadata
+        {
+            Title = "[Fallback] Unknown Book",
+            Authors = [],
+            Source = "fallback"
+        });
+        var orchestrator = new BookLookupOrchestrator(
+            [provider],
+            NullLogger<BookLookupOrchestrator>.Instance);
+        var metadataService = new IsbnMetadataService(orchestrator);
         var useCase = new AddBookUseCase(bookRepository, authorRepository, metadataService, _dbContext);
         var command = new AddBookByIsbnCommand(useCase);
 
@@ -112,5 +135,12 @@ public class AddBookCommandTests_Postgres : IAsyncLifetime
     public async Task DisposeAsync()
     {
         await _dbContext.DisposeAsync();
+    }
+
+    private sealed class FakeProvider(BookMetadata? result) : IBookMetadataProvider
+    {
+        public string SourceName => "Fake";
+        public Task<BookMetadata?> LookupAsync(string isbn, CancellationToken cancellationToken = default)
+            => Task.FromResult(result);
     }
 }

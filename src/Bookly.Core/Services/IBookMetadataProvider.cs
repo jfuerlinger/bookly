@@ -1,6 +1,6 @@
-using Bookly.Api.Models;
+using Bookly.Core.Models;
 
-namespace Bookly.Api.Services;
+namespace Bookly.Core.Services;
 
 public interface IBookMetadataProvider
 {

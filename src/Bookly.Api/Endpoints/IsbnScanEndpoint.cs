@@ -1,10 +1,8 @@
 using Bookly.Api.Models;
-using Bookly.Api.Services;
-using Bookly.Core.Data;
 using Bookly.Core.Entities;
-using Bookly.Core.Isbn;
+using Bookly.Core.Models;
+using Bookly.Core.UseCases;
 using Microsoft.AspNetCore.Http.HttpResults;
-using Microsoft.EntityFrameworkCore;
 
 namespace Bookly.Api.Endpoints;
 
@@ -32,93 +30,33 @@ public static class IsbnScanEndpoint
         ValidationProblem,
         ProblemHttpResult>> HandleScanAsync(
         IsbnScanRequest request,
-        BookLookupOrchestrator orchestrator,
-        BooklyDbContext db,
-        ILogger<BookLookupOrchestrator> logger,
+        IAddBookUseCase useCase,
         CancellationToken cancellationToken)
     {
-        // 1. Validate ISBN
-        var validation = IsbnValidator.Validate(request.Isbn);
-        if (!validation.IsValid)
+        var result = await useCase.ExecuteAsync(request.Isbn ?? "", cancellationToken: cancellationToken);
+
+        return result.Outcome switch
         {
-            return TypedResults.ValidationProblem(
+            AddBookOutcome.ValidationFailed => TypedResults.ValidationProblem(
                 new Dictionary<string, string[]>
                 {
-                    ["isbn"] = [validation.Error!]
-                });
-        }
+                    ["isbn"] = [result.Error!]
+                }),
 
-        var normalizedIsbn = validation.NormalizedIsbn!;
+            AddBookOutcome.AlreadyExists => TypedResults.Ok(MapToDto(result.Book!)),
 
-        // 2. Check for existing book (deduplication)
-        var existing = await db.Books
-            .Include(b => b.BookAuthors)
-            .ThenInclude(ba => ba.Author)
-            .FirstOrDefaultAsync(b => b.NormalizedIsbn == normalizedIsbn, cancellationToken);
-
-        if (existing is not null)
-        {
-            logger.LogInformation("Book with ISBN {Isbn} already exists (Id={BookId})",
-                normalizedIsbn, existing.Id);
-            return TypedResults.Ok(MapToDto(existing));
-        }
-
-        // 3. Lookup metadata
-        var metadata = await orchestrator.LookupAsync(normalizedIsbn, cancellationToken);
-        if (metadata is null)
-        {
-            return TypedResults.Problem(
+            AddBookOutcome.MetadataNotFound => TypedResults.Problem(
                 title: "Book not found",
-                detail: $"No metadata found for ISBN '{request.Isbn}' from any provider.",
-                statusCode: StatusCodes.Status404NotFound);
-        }
+                detail: result.Error,
+                statusCode: StatusCodes.Status404NotFound),
 
-        // 4. Resolve or create authors
-        var bookAuthors = new List<BookAuthor>();
-        foreach (var authorName in metadata.Authors)
-        {
-            var author = await db.Authors
-                .FirstOrDefaultAsync(a => a.Name == authorName, cancellationToken);
+            AddBookOutcome.Created => TypedResults.Created(
+                $"/api/library/{result.Book!.Id}", MapToDto(result.Book)),
 
-            if (author is null)
-            {
-                author = new Author { Name = authorName };
-                db.Authors.Add(author);
-            }
-
-            bookAuthors.Add(new BookAuthor { Author = author });
-        }
-
-        // 5. Create and persist book
-        var now = DateTime.UtcNow;
-        var book = new Book
-        {
-            Isbn10 = metadata.Isbn10 ?? validation.Isbn10,
-            Isbn13 = metadata.Isbn13 ?? validation.Isbn13,
-            NormalizedIsbn = normalizedIsbn,
-            Title = metadata.Title,
-            Subtitle = metadata.Subtitle,
-            Publisher = metadata.Publisher,
-            PublishedOn = metadata.PublishedOn,
-            Language = metadata.Language,
-            PageCount = metadata.PageCount,
-            Description = metadata.Description,
-            CoverSmallUrl = metadata.CoverSmallUrl,
-            CoverMediumUrl = metadata.CoverMediumUrl,
-            CoverLargeUrl = metadata.CoverLargeUrl,
-            MetadataSource = metadata.Source,
-            CreatedAtUtc = now,
-            UpdatedAtUtc = now,
-            BookAuthors = bookAuthors,
+            _ => TypedResults.Problem(
+                title: "Unexpected error",
+                statusCode: StatusCodes.Status500InternalServerError)
         };
-
-        db.Books.Add(book);
-        await db.SaveChangesAsync(cancellationToken);
-
-        logger.LogInformation("Saved book '{Title}' (Id={BookId}) from {Source}",
-            book.Title, book.Id, book.MetadataSource);
-
-        return TypedResults.Created($"/api/library/{book.Id}", MapToDto(book));
     }
 
     internal static BookDto MapToDto(Book book) => new()

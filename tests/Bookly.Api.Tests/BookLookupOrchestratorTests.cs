@@ -1,5 +1,5 @@
-using Bookly.Api.Models;
-using Bookly.Api.Services;
+using Bookly.Core.Models;
+using Bookly.Core.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Bookly.Api.Tests;

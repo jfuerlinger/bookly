@@ -1,135 +1,90 @@
 using Bookly.Api.Endpoints;
-using Bookly.Api.Models;
-using Bookly.Api.Services;
-using Bookly.Core.Data;
 using Bookly.Core.Entities;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging.Abstractions;
+using Bookly.Core.Models;
+using Bookly.Core.UseCases;
+using Moq;
 
 namespace Bookly.Api.Tests;
 
-public class IsbnScanEndpointTests : IDisposable
+public class IsbnScanEndpointTests
 {
-    private readonly BooklyDbContext _db;
-
-    public IsbnScanEndpointTests()
-    {
-        var options = new DbContextOptionsBuilder<BooklyDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-        _db = new BooklyDbContext(options);
-    }
-
-    public void Dispose() => _db.Dispose();
-
     [Fact]
-    public async Task HandleScanAsync_ValidIsbn_CreatesBook()
+    public async Task HandleScanAsync_Created_ReturnsCreatedWithBookDto()
     {
-        var orchestrator = CreateOrchestrator(new BookMetadata
-        {
-            Title = "Test Book",
-            Authors = ["Author One", "Author Two"],
-            Publisher = "Test Publisher",
-            PageCount = 200,
-            Source = "TestSource"
-        });
+        var book = CreateTestBook(1, "9780306406157", "Test Book", "TestSource");
+        var useCase = new Mock<IAddBookUseCase>();
+        useCase.Setup(u => u.ExecuteAsync(It.IsAny<string>(), null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AddBookResult { Outcome = AddBookOutcome.Created, Book = book });
 
-        var request = new IsbnScanRequest { Isbn = "978-0-306-40615-7" };
+        var request = new Api.Models.IsbnScanRequest { Isbn = "978-0-306-40615-7" };
 
-        var result = await IsbnScanEndpoint.HandleScanAsync(
-            request, orchestrator, _db,
-            NullLogger<BookLookupOrchestrator>.Instance,
-            CancellationToken.None);
+        var result = await IsbnScanEndpoint.HandleScanAsync(request, useCase.Object, CancellationToken.None);
 
         var created = Assert.IsType<Microsoft.AspNetCore.Http.HttpResults.Created<BookDto>>(result.Result);
         Assert.Equal("Test Book", created.Value!.Title);
         Assert.Equal("9780306406157", created.Value.NormalizedIsbn);
-        Assert.Equal(2, created.Value.Authors.Count);
         Assert.Equal("TestSource", created.Value.MetadataSource);
-
-        // Verify persisted
-        var book = await _db.Books.Include(b => b.BookAuthors).ThenInclude(ba => ba.Author)
-            .FirstAsync();
-        Assert.Equal("Test Book", book.Title);
-        Assert.Equal(2, book.BookAuthors.Count);
     }
 
     [Fact]
-    public async Task HandleScanAsync_DuplicateIsbn_ReturnsExistingBook()
+    public async Task HandleScanAsync_AlreadyExists_ReturnsOk()
     {
-        // Seed an existing book
-        var existing = new Book
-        {
-            NormalizedIsbn = "9780306406157",
-            Title = "Existing Book",
-            MetadataSource = "Manual",
-            CreatedAtUtc = DateTime.UtcNow,
-            UpdatedAtUtc = DateTime.UtcNow,
-        };
-        _db.Books.Add(existing);
-        await _db.SaveChangesAsync();
+        var book = CreateTestBook(42, "9780306406157", "Existing Book", "Manual");
+        var useCase = new Mock<IAddBookUseCase>();
+        useCase.Setup(u => u.ExecuteAsync(It.IsAny<string>(), null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AddBookResult { Outcome = AddBookOutcome.AlreadyExists, Book = book });
 
-        var orchestrator = CreateOrchestrator(new BookMetadata
-        {
-            Title = "Should Not Be Used",
-            Source = "TestSource"
-        });
+        var request = new Api.Models.IsbnScanRequest { Isbn = "978-0-306-40615-7" };
 
-        var request = new IsbnScanRequest { Isbn = "978-0-306-40615-7" };
-
-        var result = await IsbnScanEndpoint.HandleScanAsync(
-            request, orchestrator, _db,
-            NullLogger<BookLookupOrchestrator>.Instance,
-            CancellationToken.None);
+        var result = await IsbnScanEndpoint.HandleScanAsync(request, useCase.Object, CancellationToken.None);
 
         var ok = Assert.IsType<Microsoft.AspNetCore.Http.HttpResults.Ok<BookDto>>(result.Result);
         Assert.Equal("Existing Book", ok.Value!.Title);
-
-        // Verify no duplicate created
-        Assert.Equal(1, await _db.Books.CountAsync());
     }
 
     [Fact]
-    public async Task HandleScanAsync_InvalidIsbn_ReturnsValidationProblem()
+    public async Task HandleScanAsync_ValidationFailed_ReturnsValidationProblem()
     {
-        var orchestrator = CreateOrchestrator(null);
-        var request = new IsbnScanRequest { Isbn = "invalid" };
+        var useCase = new Mock<IAddBookUseCase>();
+        useCase.Setup(u => u.ExecuteAsync(It.IsAny<string>(), null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AddBookResult { Outcome = AddBookOutcome.ValidationFailed, Error = "Invalid ISBN" });
 
-        var result = await IsbnScanEndpoint.HandleScanAsync(
-            request, orchestrator, _db,
-            NullLogger<BookLookupOrchestrator>.Instance,
-            CancellationToken.None);
+        var request = new Api.Models.IsbnScanRequest { Isbn = "invalid" };
+
+        var result = await IsbnScanEndpoint.HandleScanAsync(request, useCase.Object, CancellationToken.None);
 
         Assert.IsType<Microsoft.AspNetCore.Http.HttpResults.ValidationProblem>(result.Result);
     }
 
     [Fact]
-    public async Task HandleScanAsync_NotFound_ReturnsProblem()
+    public async Task HandleScanAsync_MetadataNotFound_ReturnsProblem404()
     {
-        var orchestrator = CreateOrchestrator(null);
-        var request = new IsbnScanRequest { Isbn = "978-0-306-40615-7" };
+        var useCase = new Mock<IAddBookUseCase>();
+        useCase.Setup(u => u.ExecuteAsync(It.IsAny<string>(), null, null, It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new AddBookResult { Outcome = AddBookOutcome.MetadataNotFound, Error = "No metadata found" });
 
-        var result = await IsbnScanEndpoint.HandleScanAsync(
-            request, orchestrator, _db,
-            NullLogger<BookLookupOrchestrator>.Instance,
-            CancellationToken.None);
+        var request = new Api.Models.IsbnScanRequest { Isbn = "978-0-306-40615-7" };
+
+        var result = await IsbnScanEndpoint.HandleScanAsync(request, useCase.Object, CancellationToken.None);
 
         var problem = Assert.IsType<Microsoft.AspNetCore.Http.HttpResults.ProblemHttpResult>(result.Result);
         Assert.Equal(404, problem.StatusCode);
     }
 
-    private static BookLookupOrchestrator CreateOrchestrator(BookMetadata? metadata)
+    private static Book CreateTestBook(int id, string isbn, string title, string source)
     {
-        var provider = new InMemoryProvider(metadata);
-        return new BookLookupOrchestrator(
-            [provider],
-            NullLogger<BookLookupOrchestrator>.Instance);
-    }
-
-    private sealed class InMemoryProvider(BookMetadata? result) : IBookMetadataProvider
-    {
-        public string SourceName => "InMemory";
-        public Task<BookMetadata?> LookupAsync(string isbn, CancellationToken cancellationToken = default)
-            => Task.FromResult(result);
+        var author = new Author { Id = 1, Name = "Test Author" };
+        var book = new Book
+        {
+            Id = id,
+            NormalizedIsbn = isbn,
+            Isbn13 = isbn,
+            Title = title,
+            MetadataSource = source,
+            CreatedAtUtc = DateTime.UtcNow,
+            UpdatedAtUtc = DateTime.UtcNow,
+            BookAuthors = [new BookAuthor { BookId = id, AuthorId = 1, Author = author }]
+        };
+        return book;
     }
 }

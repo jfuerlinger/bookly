@@ -29,15 +29,28 @@ public sealed class AddBookByIsbnCommand(IAddBookUseCase useCase) : ICommand
 
         try
         {
-            var book = await useCase.ExecuteAsync(isbn, titleOverride, authorOverrides.Count > 0 ? authorOverrides : null, cancellationToken);
-            var output = FormatBook(book, outputFormat);
-            Console.WriteLine(output);
-            return 0;
-        }
-        catch (InvalidOperationException ex)
-        {
-            Console.Error.WriteLine($"Error: {ex.Message}");
-            return 1;
+            var result = await useCase.ExecuteAsync(isbn, titleOverride, authorOverrides.Count > 0 ? authorOverrides : null, cancellationToken);
+
+            switch (result.Outcome)
+            {
+                case AddBookOutcome.ValidationFailed:
+                    Console.Error.WriteLine($"Error: {result.Error}");
+                    return 1;
+
+                case AddBookOutcome.MetadataNotFound:
+                    Console.Error.WriteLine($"Error: {result.Error}");
+                    return 1;
+
+                case AddBookOutcome.AlreadyExists:
+                case AddBookOutcome.Created:
+                    var output = FormatBook(result.Book!, outputFormat);
+                    Console.WriteLine(output);
+                    return 0;
+
+                default:
+                    Console.Error.WriteLine("Unexpected error.");
+                    return 2;
+            }
         }
         catch (Exception ex)
         {
