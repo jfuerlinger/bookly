@@ -10,6 +10,20 @@ Diese Regeln gelten fuer das gesamte Repository, inklusive AppHost, ServiceDefau
 1. Fuer Container-basierte lokale Workflows ist in diesem Repository **Podman statt Docker** zu verwenden.
 2. Bestehende Docker-Befehle und -Annahmen sind auf Podman zu uebertragen.
 
+## Aspire CLI Verifikation (Release 13.2)
+1. Zur Verifikation von Umsetzungen ist **immer die aktuellste stabile Aspire CLI** zu verwenden.
+2. Vor Verifikationslaeufen ist die CLI-Version aktiv zu pruefen (`aspire --version`) und bei Bedarf direkt zu aktualisieren (z. B. via `aspire update` bzw. ueber den genutzten Installationsweg).
+3. Fuer laenger laufende lokale Verifikation und Agent-Workflows ist der **Detached-Ansatz aus 13.2** zu bevorzugen:
+- Start mit `aspire start` (bei Bedarf `--isolated`).
+- Laufende Instanzen mit `aspire ps` kontrollieren.
+- Ressourcenstatus mit `aspire describe` bzw. `aspire describe --follow` beobachten.
+- Logs gezielt mit `aspire logs` (optional ressourcenspezifisch) auswerten.
+- Mit `aspire stop` sauber beenden.
+4. Fuer skriptbare Readiness-Pruefungen ist `aspire wait <resource> --timeout <sekunden>` zu verwenden.
+5. Bei lokalen Umgebungsproblemen ist `aspire doctor` verpflichtend auszufuehren, bevor Workarounds dokumentiert oder akzeptiert werden.
+6. Secrets fuer lokale Verifikation sind ueber CLI-/Secret-Mechanismen zu verwalten (13.2: `aspire secret`), niemals ueber Hardcoding in Code, Tests oder Konfigurationsdateien im Repo.
+7. Die in 13.2 eingefuehrte CLI-Umstellung (`aspire agent` statt `aspire mcp`) ist in allen neuen Anleitungen, Skripten und Reviews zu beruecksichtigen.
+
 ## Core Principles
 1. Liefere nur produktionsreife Aenderungen, keine Demo-Loesungen.
 2. Behalte bestehende Architektur- und Naming-Konventionen bei.
