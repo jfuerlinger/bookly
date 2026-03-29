@@ -1,0 +1,275 @@
+@page "/scan"
+@rendermode InteractiveServer
+@inject IHttpClientFactory HttpClientFactory
+
+<PageTitle>Scan ISBN - Bookly</PageTitle>
+
+<div class="scan-page">
+    <header class="scan-header">
+        <h2 class="scan-title">Scan ISBN</h2>
+        <p class="scan-subtitle">Add a book to your library by scanning or entering its ISBN.</p>
+    </header>
+
+    <div class="scan-form-card card-glass">
+        @* Manual ISBN Input *@
+        <div class="form-group">
+            <label for="isbnInput" class="form-label">ISBN</label>
+            <div class="isbn-input-row">
+                <input id="isbnInput"
+                       type="text"
+                       class="input-atelier @(ValidationError is not null ? "input-error" : "")"
+                       placeholder="e.g. 978-3-16-148410-0"
+                       @bind="IsbnInput"
+                       @bind:event="onchange"
+                       @onkeydown="HandleKeyDown"
+                       aria-describedby="isbnHelp isbnError"
+                       aria-invalid="@(ValidationError is not null ? "true" : null)"
+                       disabled="@IsLoading" />
+                <button class="btn-primary-gradient scan-submit-btn"
+                        @onclick="ScanAsync"
+                        disabled="@IsLoading"
+                        aria-label="Look up ISBN">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                    Look up
+                </button>
+            </div>
+            <p id="isbnHelp" class="form-hint">Enter an ISBN-10 or ISBN-13. Hyphens are optional.</p>
+            @if (ValidationError is not null)
+            {
+                <p id="isbnError" class="form-error" role="alert">
+                    <span class="material-symbols-outlined form-error-icon" aria-hidden="true">error</span>
+                    @ValidationError
+                </p>
+            }
+        </div>
+
+        @* Camera Scan Section *@
+        <div class="scan-camera-section">
+            <button class="btn-outline scan-camera-btn"
+                    @onclick="ToggleCamera"
+                    disabled="@IsLoading"
+                    aria-label="@(ShowCamera ? "Close camera" : "Open camera to scan barcode")">
+                <span class="material-symbols-outlined" aria-hidden="true">
+                    @(ShowCamera ? "videocam_off" : "photo_camera")
+                </span>
+                @(ShowCamera ? "Close Camera" : "Scan with Camera")
+            </button>
+
+            @if (ShowCamera)
+            {
+                <div class="camera-container" role="region" aria-label="Camera barcode scanner">
+                    <video id="scannerVideo" autoplay playsinline class="camera-video"></video>
+                    <div class="camera-overlay">
+                        <div class="camera-guide"></div>
+                    </div>
+                    <p class="camera-hint">Point your camera at a barcode</p>
+                </div>
+            }
+        </div>
+    </div>
+
+    @* Loading State *@
+    @if (IsLoading)
+    {
+        <div class="scan-state card-glass" role="status" aria-live="polite">
+            <div class="loading-spinner"></div>
+            <p class="state-description">Looking up ISBN @IsbnInput...</p>
+        </div>
+    }
+
+    @* Error State *@
+    @if (ApiError is not null)
+    {
+        <div class="alert-error-atelier" role="alert">
+            <span class="material-symbols-outlined" aria-hidden="true">error</span>
+            @ApiError
+        </div>
+    }
+
+    @* Success State *@
+    @if (ScannedBook is not null)
+    {
+        <div class="scan-result card-glass" role="status" aria-live="polite">
+            <div class="result-header">
+                <span class="material-symbols-outlined result-check" aria-hidden="true">check_circle</span>
+                <h3 class="result-heading">Book added to your library!</h3>
+            </div>
+
+            <div class="result-content">
+                @if (ScannedBook.CoverMediumUrl is not null)
+                {
+                    <img src="@ScannedBook.CoverMediumUrl"
+                         alt="Cover of @ScannedBook.Title"
+                         class="result-cover"
+                         loading="lazy" />
+                }
+                else
+                {
+                    <div class="result-cover-placeholder">
+                        <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                    </div>
+                }
+
+                <div class="result-meta">
+                    <h4 class="result-title">@ScannedBook.Title</h4>
+                    @if (ScannedBook.Subtitle is not null)
+                    {
+                        <p class="result-subtitle">@ScannedBook.Subtitle</p>
+                    }
+                    @if (ScannedBook.Authors.Count > 0)
+                    {
+                        <p class="result-author">@string.Join(", ", ScannedBook.Authors)</p>
+                    }
+
+                    <dl class="result-details">
+                        @if (ScannedBook.Publisher is not null)
+                        {
+                            <div class="result-detail-row">
+                                <dt>Publisher</dt>
+                                <dd>@ScannedBook.Publisher</dd>
+                            </div>
+                        }
+                        @if (ScannedBook.PublishedOn is not null)
+                        {
+                            <div class="result-detail-row">
+                                <dt>Published</dt>
+                                <dd>@ScannedBook.PublishedOn.Value.ToString("MMM d, yyyy")</dd>
+                            </div>
+                        }
+                        @if (ScannedBook.PageCount is not null)
+                        {
+                            <div class="result-detail-row">
+                                <dt>Pages</dt>
+                                <dd>@ScannedBook.PageCount</dd>
+                            </div>
+                        }
+                        <div class="result-detail-row">
+                            <dt>ISBN</dt>
+                            <dd class="metadata-mono">@ScannedBook.NormalizedIsbn</dd>
+                        </div>
+                        <div class="result-detail-row">
+                            <dt>Source</dt>
+                            <dd>@ScannedBook.MetadataSource</dd>
+                        </div>
+                    </dl>
+                </div>
+            </div>
+
+            <button class="btn-outline scan-another-btn" @onclick="Reset" aria-label="Scan another book">
+                <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                Scan another book
+            </button>
+        </div>
+    }
+</div>
+
+@code {
+    private string? IsbnInput { get; set; }
+    private string? ValidationError { get; set; }
+    private string? ApiError { get; set; }
+    private bool IsLoading { get; set; }
+    private bool ShowCamera { get; set; }
+    private BookDto? ScannedBook { get; set; }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+            await ScanAsync();
+    }
+
+    private void ToggleCamera()
+    {
+        ShowCamera = !ShowCamera;
+    }
+
+    private async Task ScanAsync()
+    {
+        ValidationError = null;
+        ApiError = null;
+        ScannedBook = null;
+
+        if (string.IsNullOrWhiteSpace(IsbnInput))
+        {
+            ValidationError = "Please enter an ISBN.";
+            return;
+        }
+
+        try
+        {
+            IsLoading = true;
+            StateHasChanged();
+
+            var client = HttpClientFactory.CreateClient("BooklyApi");
+            var response = await client.PostAsJsonAsync("/api/library/isbn-scan",
+                new { isbn = IsbnInput });
+
+            if (response.IsSuccessStatusCode)
+            {
+                ScannedBook = await response.Content.ReadFromJsonAsync<BookDto>();
+                IsbnInput = null;
+                ShowCamera = false;
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.UnprocessableEntity
+                     || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                var problem = await response.Content.ReadFromJsonAsync<ValidationProblem>();
+                if (problem?.Errors?.TryGetValue("isbn", out var errors) == true && errors.Length > 0)
+                    ValidationError = errors[0];
+                else
+                    ValidationError = "Invalid ISBN format.";
+            }
+            else if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                ApiError = "No book found for this ISBN. Please check the number and try again.";
+            }
+            else
+            {
+                ApiError = "An unexpected error occurred. Please try again later.";
+            }
+        }
+        catch (Exception ex)
+        {
+            ApiError = $"Could not reach the server: {ex.Message}";
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private void Reset()
+    {
+        IsbnInput = null;
+        ValidationError = null;
+        ApiError = null;
+        ScannedBook = null;
+        ShowCamera = false;
+    }
+
+    private sealed record BookDto
+    {
+        public int Id { get; init; }
+        public string? Isbn10 { get; init; }
+        public string? Isbn13 { get; init; }
+        public required string NormalizedIsbn { get; init; }
+        public required string Title { get; init; }
+        public string? Subtitle { get; init; }
+        public List<string> Authors { get; init; } = [];
+        public string? Publisher { get; init; }
+        public DateOnly? PublishedOn { get; init; }
+        public string? Language { get; init; }
+        public int? PageCount { get; init; }
+        public string? Description { get; init; }
+        public string? CoverSmallUrl { get; init; }
+        public string? CoverMediumUrl { get; init; }
+        public string? CoverLargeUrl { get; init; }
+        public required string MetadataSource { get; init; }
+        public DateTime CreatedAtUtc { get; init; }
+        public DateTime UpdatedAtUtc { get; init; }
+    }
+
+    private sealed record ValidationProblem
+    {
+        public Dictionary<string, string[]>? Errors { get; init; }
+    }
+}
