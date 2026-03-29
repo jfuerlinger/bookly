@@ -1,0 +1,120 @@
+@page "/"
+
+<PageTitle>Bookly - Your Curated Library</PageTitle>
+
+<div class="home-page">
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <h2 class="hero-title">
+            Your Curated <span class="hero-accent">Collection.</span>
+        </h2>
+        <p class="hero-subtitle">
+            Manage your personal library with the precision of a master curator.
+        </p>
+
+        <!-- Search Bar -->
+        <div class="search-wrapper">
+            <span class="material-symbols-outlined search-icon" aria-hidden="true">search</span>
+            <input type="text"
+                   class="input-search"
+                   placeholder="Search by title, author, or ISBN..."
+                   aria-label="Search your library" />
+        </div>
+    </section>
+
+    <!-- Category Filter Chips -->
+    <section class="filter-bar" aria-label="Filter books by category">
+        <div class="filter-scroll">
+            <button class="chip chip-filter chip-filter-active" aria-pressed="true">All Books</button>
+            <button class="chip chip-filter chip-filter-inactive" aria-pressed="false">Currently Reading</button>
+            <button class="chip chip-filter chip-filter-inactive" aria-pressed="false">Completed</button>
+            <button class="chip chip-filter chip-filter-inactive" aria-pressed="false">Borrowed</button>
+            <button class="chip chip-filter chip-filter-inactive" aria-pressed="false">Wishlist</button>
+        </div>
+    </section>
+
+    <!-- Book Grid -->
+    <section class="book-grid" aria-label="Your books">
+
+        <!-- Featured Book Card -->
+        <article class="card-featured featured-card">
+            <div class="featured-cover">
+                <div class="featured-cover-placeholder">
+                    <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                </div>
+                <span class="chip chip-featured">Featured</span>
+            </div>
+            <div class="featured-info">
+                <div class="featured-meta">
+                    <span class="category-label">Art &amp; Design</span>
+                </div>
+                <h3 class="featured-title">The Modern Aesthetics of Minimalism</h3>
+                <p class="featured-desc">A deep dive into the philosophy of essentialism in 21st-century architectural design and visual arts.</p>
+
+                <div class="featured-footer">
+                    <div class="progress-section">
+                        <span class="progress-label">Progress</span>
+                        <div class="shelf-progress-track">
+                            <div class="shelf-progress-fill" style="width: 65%;"></div>
+                        </div>
+                    </div>
+                    <a href="book/1" class="card-action-btn" aria-label="View details">
+                        <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
+                    </a>
+                </div>
+            </div>
+        </article>
+
+        <!-- Standard Book Cards -->
+        <article class="card-standard book-card">
+            <div class="book-cover">
+                <div class="book-cover-placeholder cover-warm">
+                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
+                </div>
+                <span class="chip chip-borrowed">Borrowed</span>
+            </div>
+            <div class="book-info">
+                <h4 class="book-title">The Alchemist</h4>
+                <p class="book-author">Paulo Coelho</p>
+            </div>
+        </article>
+
+        <article class="card-standard book-card">
+            <div class="book-cover">
+                <div class="book-cover-placeholder cover-cool">
+                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
+                </div>
+                <span class="chip chip-completed">Completed</span>
+            </div>
+            <div class="book-info">
+                <h4 class="book-title">Digital Renaissance</h4>
+                <p class="book-author">Joel Waldfogel</p>
+            </div>
+        </article>
+
+        <article class="card-standard book-card">
+            <div class="book-cover">
+                <div class="book-cover-placeholder cover-dark">
+                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
+                </div>
+            </div>
+            <div class="book-info">
+                <h4 class="book-title">The Singularity</h4>
+                <p class="book-author">Ray Kurzweil</p>
+            </div>
+        </article>
+
+        <article class="card-standard book-card">
+            <div class="book-cover">
+                <div class="book-cover-placeholder cover-nature">
+                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
+                </div>
+                <span class="chip chip-wishlist">Wishlist</span>
+            </div>
+            <div class="book-info">
+                <h4 class="book-title">Into the Wild</h4>
+                <p class="book-author">Jon Krakauer</p>
+            </div>
+        </article>
+    </section>
+</div>

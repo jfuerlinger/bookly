@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atelier - ISBN Scanner</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Manrope:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#9795ff",
+              "on-primary-fixed": "#000000",
+              "error-dim": "#a70138",
+              "error-container": "#f74b6d",
+              "on-tertiary": "#ffeef6",
+              "on-surface-variant": "#595c5e",
+              "tertiary-dim": "#842b73",
+              "surface-container-high": "#dfe3e6",
+              "primary-dim": "#3d30d4",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#650d58",
+              "on-surface": "#2c2f31",
+              "tertiary-fixed-dim": "#f088d4",
+              "error": "#b41340",
+              "secondary-fixed": "#cdcdff",
+              "secondary-container": "#cdcdff",
+              "surface-dim": "#d0d5d8",
+              "on-tertiary-fixed": "#430039",
+              "on-error-container": "#510017",
+              "on-secondary-container": "#2f2ebf",
+              "inverse-surface": "#0b0f10",
+              "primary": "#4a40e0",
+              "on-primary": "#f4f1ff",
+              "surface-tint": "#4a40e0",
+              "primary-fixed-dim": "#8885ff",
+              "surface-variant": "#d9dde0",
+              "tertiary": "#933880",
+              "on-error": "#ffefef",
+              "surface-bright": "#f5f7f9",
+              "on-secondary-fixed": "#160bae",
+              "on-tertiary-fixed-variant": "#701961",
+              "secondary": "#4647d3",
+              "on-primary-fixed-variant": "#1a0099",
+              "background": "#f5f7f9",
+              "inverse-primary": "#8582ff",
+              "on-primary-container": "#14007e",
+              "surface": "#f5f7f9",
+              "surface-container": "#e5e9eb",
+              "surface-container-highest": "#d9dde0",
+              "surface-container-low": "#eef1f3",
+              "secondary-fixed-dim": "#bdbeff",
+              "tertiary-fixed": "#ff95e3",
+              "secondary-dim": "#3939c7",
+              "outline": "#747779",
+              "on-background": "#2c2f31",
+              "inverse-on-surface": "#9a9d9f",
+              "on-secondary": "#f4f1ff",
+              "tertiary-container": "#ff95e3",
+              "outline-variant": "#abadaf",
+              "on-secondary-fixed-variant": "#3a3ac8",
+              "primary-container": "#9795ff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .scanner-frame-corner {
+            width: 40px;
+            height: 40px;
+            border-color: #9795ff;
+            position: absolute;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background font-body text-on-surface antialiased overflow-hidden">
+<!-- TopAppBar Shell -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(44,47,49,0.06)]">
+<div class="flex items-center justify-between px-6 h-16 w-full">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">menu_book</span>
+<span class="font-manrope font-extrabold tracking-tighter text-indigo-600 dark:text-indigo-400 text-2xl">Atelier</span>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity scale-95 active:transition-transform">
+<span class="material-symbols-outlined text-slate-500 dark:text-slate-400">search</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Content: Scanner Viewport -->
+<main class="relative h-screen w-full bg-neutral-900 overflow-hidden">
+<!-- Full-screen Camera Viewfinder Simulation -->
+<div class="absolute inset-0 z-0">
+<img alt="dimly lit bookshelf in a modern library with wooden shelves and soft ambient lighting" class="w-full h-full object-cover opacity-60" data-alt="a blurred background of a modern minimalist bookshelf with various colorful book spines in a soft focus library setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAgdYyOcFMcfE1GjWJ3lmm9RfHqxzcwjYTlcdfZMT0KTC3cf_zCSWqO7LtlheTuMUD8ErMjCMZYIbl1UO8KUGDdp4TSHo5SlYTQXF4h8dULgN1zItHBjBAAZwrKZKOGAs-J67N8CAlCoP7twiqEzEqzwHJF-i73XyPbx2x9UNPIPtrZMa6dwwtnN4S5x-oMqkNu3ENPMbc4tRstnYqWFpWKrw8PjpSeisdeLdA5OpCa3uqY1Lu-cBhJgWbr5FT3RKh-1pRzQUohC4ZZ"/>
+</div>
+<!-- Scanning UI Overlay Layer -->
+<div class="absolute inset-0 z-10 flex flex-col items-center justify-center pointer-events-none">
+<!-- Minimalist Scanning Frame -->
+<div class="relative w-72 h-48 md:w-96 md:h-64 border border-white/20 rounded-xl overflow-hidden">
+<!-- Frame Corners -->
+<div class="scanner-frame-corner top-0 left-0 border-t-4 border-l-4 rounded-tl-xl"></div>
+<div class="scanner-frame-corner top-0 right-0 border-t-4 border-r-4 rounded-tr-xl"></div>
+<div class="scanner-frame-corner bottom-0 left-0 border-b-4 border-l-4 rounded-bl-xl"></div>
+<div class="scanner-frame-corner bottom-0 right-0 border-b-4 border-r-4 rounded-br-xl"></div>
+<!-- Animated Scan Line -->
+<div class="absolute inset-x-0 h-0.5 bg-gradient-to-r from-transparent via-primary-fixed to-transparent top-1/2 -translate-y-1/2 shadow-[0_0_15px_#9795ff]"></div>
+<!-- Center Guide Text -->
+<div class="absolute bottom-4 left-0 right-0 text-center">
+<span class="text-white/60 font-label text-[10px] uppercase tracking-widest">Align ISBN Barcode</span>
+</div>
+</div>
+<!-- Floating Manual Controls (Interaction Layer) -->
+<div class="pointer-events-auto mt-12 flex gap-6">
+<button class="w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 shadow-lg">
+<span class="material-symbols-outlined">flashlight_on</span>
+</button>
+<button class="px-8 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center gap-3 text-white font-label font-semibold tracking-wide hover:bg-white/20 transition-all active:scale-95 shadow-lg">
+<span class="material-symbols-outlined">edit_square</span>
+<span>Manual Entry</span>
+</button>
+<button class="w-14 h-14 rounded-full bg-white/10 backdrop-blur-md border border-white/20 flex items-center justify-center text-white hover:bg-white/20 transition-all active:scale-95 shadow-lg">
+<span class="material-symbols-outlined">history</span>
+</button>
+</div>
+</div>
+<!-- 'Last Scanned' Glassmorphic Pop-up -->
+<div class="absolute bottom-32 left-1/2 -translate-x-1/2 w-[90%] max-w-sm z-20">
+<div class="bg-white/10 dark:bg-slate-900/40 backdrop-blur-2xl border border-white/10 p-4 rounded-xl shadow-[0_32px_64px_rgba(0,0,0,0.3)] flex items-center gap-4">
+<div class="w-16 h-22 flex-shrink-0 bg-surface-container rounded-sm overflow-hidden shadow-md">
+<img alt="book cover with minimalist typography on a white background with a single blue line" class="w-full h-full object-cover" data-alt="elegant minimalist book cover with modern typography titled 'The Future of Art' on high-quality paper texture" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXQHbCJKiF4gm9tEf4t-vUyCeSWHzfBueZ7an1yLvdBrArsMt6d6N4R5tYk2IyWqypecRBkYgcB7uY5mxwiv2f2FfOI5bOqc1YEPIH3S5BHOo53KdPpSz2O2DEX9oYeBhT8jc4SoCPh4ZV0jlQBwm7NjMyyB-qWgfCrDq4NH4NrWGBtu0Rd8n0rkOxq4Yvg97Hh6p2oPRqGrKbF1kJ7gaky5MGFitFRVdUgQU8nIIIAtj6eRC5ImEQzPKATZ0bxG4hL4T8VDjryoU9"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2 mb-1">
+<span class="text-xs font-label text-primary-fixed font-bold tracking-widest uppercase">Success</span>
+<span class="material-symbols-outlined text-primary-fixed text-sm" style="font-variation-settings: 'FILL' 1;">check_circle</span>
+</div>
+<h3 class="text-white font-headline font-bold truncate leading-tight">The Art of Curation</h3>
+<p class="text-white/60 text-sm font-body truncate">Isabella Sterling • 2024</p>
+</div>
+<button class="w-10 h-10 rounded-full bg-primary/20 flex items-center justify-center text-primary-fixed hover:bg-primary/40 transition-colors">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+</div>
+</main>
+<!-- BottomNavBar Shell -->
+<nav class="fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center">
+<div class="w-[90%] max-w-md bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl rounded-full px-4 py-2 flex justify-around items-center shadow-[0_20px_40px_rgba(44,47,49,0.1)]">
+<!-- Library -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:text-indigo-500 transition-colors active:duration-200" href="#">
+<span class="material-symbols-outlined mb-1">library_books</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Library</span>
+</a>
+<!-- Scan (ACTIVE) -->
+<a class="flex flex-col items-center justify-center bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white rounded-full p-3 shadow-lg shadow-indigo-500/30 scale-110" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">barcode_scanner</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Scan</span>
+</a>
+<!-- Discover -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:text-indigo-500 transition-colors active:duration-200" href="#">
+<span class="material-symbols-outlined mb-1">explore</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Discover</span>
+</a>
+<!-- Profile -->
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:text-indigo-500 transition-colors active:duration-200" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

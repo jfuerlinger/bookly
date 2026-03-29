@@ -90,6 +90,7 @@ Diese Regeln gelten fuer das gesamte Repository, inklusive AppHost, ServiceDefau
 2. Neue Features und Bugfixes ohne Tests sind unvollstaendig.
 3. Flaky Tests sind sofort zu stabilisieren oder temporaer zu quarantainen mit Ticket.
 4. Sicherheitskritische und performancekritische Pfade explizit testen.
+5. Führe E2E-Tests nur nach meiner expliziten Aufforderung durch!
 
 ## Observability und Betrieb
 1. Jeder Service emittiert:

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atelier - Discover &amp; Map</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<!-- Tailwind -->
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary-fixed": "#9795ff",
+              "on-primary-fixed": "#000000",
+              "error-dim": "#a70138",
+              "error-container": "#f74b6d",
+              "on-tertiary": "#ffeef6",
+              "on-surface-variant": "#595c5e",
+              "tertiary-dim": "#842b73",
+              "surface-container-high": "#dfe3e6",
+              "primary-dim": "#3d30d4",
+              "surface-container-lowest": "#ffffff",
+              "on-tertiary-container": "#650d58",
+              "on-surface": "#2c2f31",
+              "tertiary-fixed-dim": "#f088d4",
+              "error": "#b41340",
+              "secondary-fixed": "#cdcdff",
+              "secondary-container": "#cdcdff",
+              "surface-dim": "#d0d5d8",
+              "on-tertiary-fixed": "#430039",
+              "on-error-container": "#510017",
+              "on-secondary-container": "#2f2ebf",
+              "inverse-surface": "#0b0f10",
+              "primary": "#4a40e0",
+              "on-primary": "#f4f1ff",
+              "surface-tint": "#4a40e0",
+              "primary-fixed-dim": "#8885ff",
+              "surface-variant": "#d9dde0",
+              "tertiary": "#933880",
+              "on-error": "#ffefef",
+              "surface-bright": "#f5f7f9",
+              "on-secondary-fixed": "#160bae",
+              "on-tertiary-fixed-variant": "#701961",
+              "secondary": "#4647d3",
+              "on-primary-fixed-variant": "#1a0099",
+              "background": "#f5f7f9",
+              "inverse-primary": "#8582ff",
+              "on-primary-container": "#14007e",
+              "surface": "#f5f7f9",
+              "surface-container": "#e5e9eb",
+              "surface-container-highest": "#d9dde0",
+              "surface-container-low": "#eef1f3",
+              "secondary-fixed-dim": "#bdbeff",
+              "tertiary-fixed": "#ff95e3",
+              "secondary-dim": "#3939c7",
+              "outline": "#747779",
+              "on-background": "#2c2f31",
+              "inverse-on-surface": "#9a9d9f",
+              "on-secondary": "#f4f1ff",
+              "tertiary-container": "#ff95e3",
+              "outline-variant": "#abadaf",
+              "on-secondary-fixed-variant": "#3a3ac8",
+              "primary-container": "#9795ff"
+            },
+            fontFamily: {
+              "headline": ["Manrope"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "1rem", "lg": "2rem", "xl": "3rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+        .custom-map-marker {
+            filter: drop-shadow(0 4px 6px rgba(74, 64, 224, 0.2));
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased overflow-hidden h-screen flex flex-col">
+<!-- TopAppBar -->
+<header class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl fixed top-0 w-full z-50 shadow-[0_20px_40px_rgba(44,47,49,0.06)]">
+<div class="flex items-center justify-between px-6 h-16 w-full max-w-7xl mx-auto">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">menu_book</span>
+<h1 class="font-manrope font-extrabold tracking-tighter text-indigo-600 dark:text-indigo-400 text-2xl">Atelier</h1>
+</div>
+<div class="flex items-center gap-4">
+<button class="hover:opacity-80 transition-opacity scale-95 active:transition-transform">
+<span class="material-symbols-outlined text-indigo-600 dark:text-indigo-400">search</span>
+</button>
+</div>
+</div>
+</header>
+<!-- Main Canvas: Map View -->
+<main class="flex-grow relative mt-16 overflow-hidden">
+<!-- Mock Map Background -->
+<div class="absolute inset-0 bg-surface-container-low overflow-hidden">
+<img class="w-full h-full object-cover grayscale opacity-40 mix-blend-multiply" data-alt="Modern minimalist city map view with clean streets and soft grey and white tones for a sophisticated user interface background" data-location="New York City" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7Y-1S7vCi3cT4YtFOd03XZ3IxTBYbIjH_nSJvogMD7_3idCwCd5Pnqn54sbG99Bz7vZGhfWjf8-sKk3PbPsHTAVx6XDO1F1B3w8Hv5l9tmhDkTtta5cEZR5jmPa0CF3nR8tR3RlZTlSZ2H95qlu2hr4OZlgAZrYshYgdmKKYHFC7mkn_5MBpv0STmGgK2jTffko5dNehlBm2YnGdRMuK1XnzvBMDHQN3rhFnNFqroW5nytk-pj0k_-yCd-kbDFJckMudsi7dxoafZ"/>
+<!-- Custom Map Markers -->
+<div class="absolute top-[30%] left-[25%] group cursor-pointer">
+<div class="relative flex flex-col items-center">
+<div class="w-12 h-12 rounded-full border-4 border-white shadow-xl overflow-hidden custom-map-marker">
+<img class="w-full h-full object-cover" data-alt="Cover of a classic minimalist novel with beige and black typography sitting on a library shelf" src="https://lh3.googleusercontent.com/aida-public/AB6AXuALjrZNn1yEW9W8jSB647cRJ-GAGp91zDdd4tMyDVA2gRxxq4aSu2-5wULghv-iTVE8LajGKcuYerUbuOka-oKF7g4SAHSSEpoIE-R-qS9RHi1x8e-jc8Wra-KJwK2sqeRdu6ooLWaQF-F2pCG49aAh-rorhNGMUqvW_2qgxORRdlcMeE2Oj43fVLjRoGr-wlBrzHNT0Fcev29BJlJrrIzjhpXRT5Wllw1U_w7LTfACM-Q21ToIyIV4xjfAO9zxddHJbTWP0nCd6AD-"/>
+</div>
+<div class="absolute -bottom-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>
+</div>
+</div>
+<div class="absolute top-[45%] left-[60%] group cursor-pointer">
+<div class="relative flex flex-col items-center">
+<div class="w-12 h-12 rounded-full border-4 border-white shadow-xl overflow-hidden custom-map-marker">
+<img class="w-full h-full object-cover" data-alt="Vibrant modern art book cover with abstract blue and orange shapes and bold serif title text" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDqKCp_leJUXijpsE14awbibyb9S4msFa7AP0X7OkRjmQNCaClx3f9rTApzGmyPQT_kUjegebnAkJHEWMD3i0IcaLQPMNYGPbDkWH2Mj6Fz5ndRcTbkHWWTIp2cAd0XmPCqWzgZ480EJKdaEoDn69ZNBXmDLQRIiPbRXMUWs1GAP6YlzDIjiwNd5q6q4dN6cASUU26mOH49FYXJD2Q0GKmVY4xK9uUR8JPTV2ndWq5Z6ClYqlM61E5CY-Y8NopwPZLaItMa2o5Q2-cN"/>
+</div>
+<div class="absolute -bottom-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>
+</div>
+</div>
+<div class="absolute top-[20%] left-[75%] group cursor-pointer">
+<div class="relative flex flex-col items-center">
+<div class="w-10 h-10 rounded-full border-4 border-white shadow-xl overflow-hidden custom-map-marker">
+<img class="w-full h-full object-cover" data-alt="Hardcover book with a textured navy blue jacket and gold foil lettering reflecting soft library light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAOY9VBxMsAoLnef3MUEWSE9hCrlzZDIAO8BYquyeKFKNE-3ihUeghOj_yWxhiVh6RITvTm1uJ5N3LZSzjUQFvLa8lA_Y4swxSp4HF-5IwDlc5FAY1nWzl3Ptl0_3sGjA6RsZmOTBjZ6en8Vx5RSCtZD20g_3680OJ39nrwLxLTRRftyxHPEncXq-ddVzObgijKdf1iMCSiuqvpuYS3vHQxFj8Yj0cPKkbhvsStSPOy_b82VR5vGMfTAqrDGCZ8LpOr86s8JJewBlKD"/>
+</div>
+<div class="absolute -bottom-1 w-3 h-3 bg-primary rounded-full border-2 border-white"></div>
+</div>
+</div>
+</div>
+<!-- Floating Search Input -->
+<div class="absolute top-8 left-1/2 -translate-x-1/2 w-[90%] max-w-lg z-20">
+<div class="glass-panel rounded-full px-6 py-4 flex items-center gap-3 shadow-[0_20px_40px_rgba(44,47,49,0.1)] border border-white/20">
+<span class="material-symbols-outlined text-primary">explore</span>
+<input class="bg-transparent border-none focus:ring-0 w-full font-body text-on-surface placeholder:text-outline text-sm" placeholder="Search for titles or nearby readers..." type="text"/>
+<div class="w-8 h-8 rounded-full bg-surface-container-highest flex items-center justify-center">
+<span class="material-symbols-outlined text-on-surface-variant text-sm">tune</span>
+</div>
+</div>
+</div>
+<!-- Bottom Sheet UI -->
+<div class="absolute bottom-28 left-0 right-0 z-30 px-6">
+<div class="max-w-7xl mx-auto">
+<div class="flex items-end justify-between mb-4">
+<div class="space-y-1">
+<span class="text-xs font-label font-bold uppercase tracking-widest text-primary-dim">Nearby Discovery</span>
+<h2 class="font-headline font-extrabold text-2xl text-on-surface">Books Around You</h2>
+</div>
+<button class="text-sm font-semibold text-primary flex items-center gap-1 hover:opacity-80 transition-opacity">
+                        View List <span class="material-symbols-outlined text-sm">arrow_forward_ios</span>
+</button>
+</div>
+<!-- Horizontal Glass Cards Scroll -->
+<div class="flex gap-6 overflow-x-auto pb-8 no-scrollbar -mx-6 px-6">
+<!-- Book Card 1 -->
+<div class="flex-shrink-0 w-[320px] glass-panel rounded-xl p-5 shadow-[0_20px_40px_rgba(44,47,49,0.06)] border border-white/30 group">
+<div class="flex gap-4">
+<div class="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden shadow-lg transition-transform group-hover:-translate-y-2">
+<img class="w-full h-full object-cover" data-alt="Close up of a minimalist book cover with elegant typography being held by clean hands in natural light" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCOkusXBOnmhwXRfSj1ef8nbMnWPdbSdmr7WxWR3LVA2dVQQCCOFlroAXSa5wzN4qVaBo1gLf-AQouJZO09Qtiv1cgz1JTerMojIo3lOJKSQJco_ekKPH1yFKjXl7qReZluHt-vHnhHDydQf2q9BDmT7ctW1SRqJJvlLGxbtzPnOx2ikEIuogW91L-VmKJWGYinRDny8SeuY5yJgsokXxA_Q5mvASSXAj9QHi69zo3mVmViLO4rfTPa9_9k7xMDyGb56dBEOldpNarq"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h3 class="font-headline font-bold text-on-surface leading-tight">The Art of Stillness</h3>
+<p class="text-xs text-outline font-body mt-1">Pico Iyer</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<div class="w-6 h-6 rounded-full overflow-hidden bg-primary-container">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young man with a friendly expression and short dark hair in a professional studio setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCsnGmaWm2PiDpvfNrdEX5XJAzGa6DustQUL8tiOWajI_TryTqwfUR0y820wpBcJNAcowKGaWQug8fnFPVYeS7cfujvLlQfsoPkKLjeOdbiYhh6fwxgc8r3XL60OuitJAOSEs3is020P5F4XcZTvPA3O4EAHNOrx-BaH7df_9kRfPTFsBfnul5ztiEACZEImJDFrj7-Ja6sX5Oufgf4hcvqMpeLVAbxvBrc8MzKG6uOmrDOn7Wep0wgIEW0ZM1AIV62LUJiirdvABXR"/>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">0.4 km away</span>
+</div>
+</div>
+</div>
+<div class="mt-5">
+<button class="w-full bg-gradient-to-tr from-primary to-primary-container text-white py-3 rounded-full font-label font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+                                Request Borrow
+                            </button>
+</div>
+</div>
+<!-- Book Card 2 -->
+<div class="flex-shrink-0 w-[320px] glass-panel rounded-xl p-5 shadow-[0_20px_40px_rgba(44,47,49,0.06)] border border-white/30 group">
+<div class="flex gap-4">
+<div class="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden shadow-lg transition-transform group-hover:-translate-y-2">
+<img class="w-full h-full object-cover" data-alt="Colorful modern graphic design book cover with vibrant orange and teal geometric patterns on a white background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBOHlH0CkKAvq3hCwnAr_e5HUjuWRW8DGG6MVLBjtT71jRqj6B9OyHZ-By0WEat7pbJUC4_g3XPd-7XMrk-7KBir0uYJZs0EuYs2Gar0CRtuas0U0YaQwj8aLWQiZrisShxighSnJ3UTdsZTOm0bqVk6e5RaJbwEQ2OGJ6XY71JSvtehRvk9bW3j61aOO0N8G8XbNY3A8WGrX53GSqVLWKMIsyPhOZ7sSfBA3cNcZjhH_ROvcDSA1HoQvAvfw3gQINj9nlEoUbf5Cwc"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h3 class="font-headline font-bold text-on-surface leading-tight">Visual Narratives</h3>
+<p class="text-xs text-outline font-body mt-1">Elena Rostova</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<div class="w-6 h-6 rounded-full overflow-hidden bg-tertiary-container">
+<img class="w-full h-full object-cover" data-alt="Portrait of a young woman with a warm smile and wavy auburn hair in a sunlit outdoor garden" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBMjvm3BWOPP1MiYcxka2Hy1enjF-H-pBRcB9vUuX2E1YUGDBsofpCYvT_MAiOWD5SmgKAUAdKwC8TmYI-RV4GjJrdrP3J-BAugDH5VnS9j1xuQKdT8UYSSS-FeaL2QqB7IiQwMnd11cM4yul--b91EWb9gux4xd31aLBdXUXkbBV3p-xq-kneRVgxNs5tDvNHjp8B1dUcWb8uiWG-whpRdebRfEHRSw9u9V5v8vxaSHD9UIKBgp8dckWuqf2fCKo0wmBTMip6BKjUd"/>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">1.2 km away</span>
+</div>
+</div>
+</div>
+<div class="mt-5">
+<button class="w-full bg-gradient-to-tr from-primary to-primary-container text-white py-3 rounded-full font-label font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+                                Request Borrow
+                            </button>
+</div>
+</div>
+<!-- Book Card 3 -->
+<div class="flex-shrink-0 w-[320px] glass-panel rounded-xl p-5 shadow-[0_20px_40px_rgba(44,47,49,0.06)] border border-white/30 group">
+<div class="flex gap-4">
+<div class="w-24 h-32 flex-shrink-0 rounded-lg overflow-hidden shadow-lg transition-transform group-hover:-translate-y-2">
+<img class="w-full h-full object-cover" data-alt="Classic dark leather book with embossed gold title and worn edges sitting on an antique wooden desk" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBpy-HHKotwzfTJORWhoHM3IooyV576t1IuSk6vmK_htZZ4wVVqtOkON3AtvaIfGm5y7h0idd7e4vCrRyQ2Xw3CHIXJtr_Htlu4xgSLWVhYMq98v-qiMhNNuLdnIYz8VnqOFQRmrgT0KZFHLgKkBzt09vnkKZIPlgoM1fakM5-Q7usJLdQMpfjEOPoho_vITKjQf_kmI-oxWyPwYxRPavAtQkdt6Gop798zL8kAMm1_z9upQ9AGdgLn4U0y_6BDxMOkKZuCNcKT8AeB"/>
+</div>
+<div class="flex flex-col justify-between py-1">
+<div>
+<h3 class="font-headline font-bold text-on-surface leading-tight">Ephemeral City</h3>
+<p class="text-xs text-outline font-body mt-1">Marcus Thorne</p>
+</div>
+<div class="flex items-center gap-2 mt-2">
+<div class="w-6 h-6 rounded-full overflow-hidden bg-secondary-container">
+<img class="w-full h-full object-cover" data-alt="Close up of a man with glasses and a thoughtful expression in a bright modern office workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCMkvKzcuF5xrNCTM3EQJvePCQSkTL6SMB0vEuGR_qqqoXsrUifVsBXKkt4QLxKRfglS_v-AhZLGqb9ZDsSZNeAWjZpwtH2hIkPIv6FSeuIHDwNGRvgYXHgKgjtysipvY0X3x07rArhi223MjsviRIlq5e2pjgHpXryxoPfmwlbAI42RBO3SRjYVpYHy06Pw5Pfn4ezPpRi4DYLlrOoygFzOXaFaRAewhn75jMWbMZ-RMyOs1ie7zwZ-pey3gpgE0nSIbK0Yige7OnN"/>
+</div>
+<span class="text-[10px] font-semibold text-on-surface-variant uppercase tracking-wider">2.8 km away</span>
+</div>
+</div>
+</div>
+<div class="mt-5">
+<button class="w-full bg-gradient-to-tr from-primary to-primary-container text-white py-3 rounded-full font-label font-bold text-xs uppercase tracking-widest shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 transition-all">
+                                Request Borrow
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-6 left-0 right-0 z-50 flex justify-around items-center">
+<div class="bg-white/70 dark:bg-slate-900/70 backdrop-blur-2xl fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md rounded-full px-4 py-2 flex justify-around items-center shadow-[0_20px_40px_rgba(44,47,49,0.1)]">
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">library_books</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Library</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">barcode_scanner</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Scan</span>
+</a>
+<a class="flex flex-col items-center justify-center bg-gradient-to-tr from-indigo-600 to-indigo-400 text-white rounded-full p-3 shadow-lg shadow-indigo-500/30 scale-110 active:duration-200" href="#">
+<span class="material-symbols-outlined mb-1">explore</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Discover</span>
+</a>
+<a class="flex flex-col items-center justify-center text-slate-400 dark:text-slate-500 p-3 hover:text-indigo-500 transition-colors" href="#">
+<span class="material-symbols-outlined mb-1">person</span>
+<span class="font-manrope font-semibold text-[10px] uppercase tracking-widest">Profile</span>
+</a>
+</div>
+</nav>
+</body></html>

@@ -1,0 +1,29 @@
+@inherits LayoutComponentBase
+
+<div class="atelier-app">
+    <header class="top-app-bar" role="banner">
+        <div class="top-app-bar-inner">
+            <a href="" class="top-app-bar-brand" aria-label="Bookly Home">
+                <span class="material-symbols-outlined brand-icon" aria-hidden="true">menu_book</span>
+                <span class="brand-text">Bookly</span>
+            </a>
+            <div class="top-app-bar-actions">
+                <a href="" class="top-app-bar-action" aria-label="Search">
+                    <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content" role="main">
+        @Body
+    </main>
+
+    <NavMenu />
+</div>
+
+<div id="blazor-error-ui" data-nosnippet>
+    An unhandled error has occurred.
+    <a href="." class="reload">Reload</a>
+    <span class="dismiss">&#x1F5D9;</span>
+</div>

@@ -1,0 +1,121 @@
+/* --- Atelier App Shell --- */
+.atelier-app {
+    display: flex;
+    flex-direction: column;
+    min-height: 100dvh;
+}
+
+/* --- Top App Bar (frosted glass, sticky) --- */
+.top-app-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    height: 4rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    box-shadow: var(--shadow-ambient);
+}
+
+.top-app-bar-inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 100%;
+    padding: 0 var(--space-6);
+    max-width: 80rem;
+    margin: 0 auto;
+}
+
+.top-app-bar-brand {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    text-decoration: none;
+    color: var(--color-primary);
+}
+
+.top-app-bar-brand:hover {
+    opacity: 1;
+}
+
+.brand-icon {
+    color: var(--color-primary);
+    font-size: 1.5rem;
+}
+
+.brand-text {
+    font-family: var(--font-headline);
+    font-weight: 800;
+    font-size: 1.5rem;
+    letter-spacing: -0.03em;
+    color: var(--color-primary);
+}
+
+.top-app-bar-actions {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.top-app-bar-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--color-on-surface-variant);
+    transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+.top-app-bar-action:hover {
+    opacity: 0.7;
+}
+
+/* --- Main Content Area --- */
+.main-content {
+    flex: 1;
+    padding-top: 5.5rem; /* top bar + space */
+    padding-bottom: 6rem; /* bottom nav + space */
+    padding-left: var(--space-6);
+    padding-right: var(--space-6);
+    max-width: 80rem;
+    margin: 0 auto;
+    width: 100%;
+}
+
+/* --- Desktop: wider padding --- */
+@media (min-width: 768px) {
+    .main-content {
+        padding-left: var(--space-8);
+        padding-right: var(--space-8);
+    }
+}
+
+@media (min-width: 1280px) {
+    .main-content {
+        padding-left: var(--space-16);
+        padding-right: var(--space-16);
+    }
+}
+
+/* --- Blazor error UI override --- */
+#blazor-error-ui {
+    color-scheme: light only;
+    background: var(--color-surface-container-lowest);
+    bottom: 0;
+    box-shadow: var(--shadow-elevated);
+    display: none;
+    left: 0;
+    padding: var(--space-3) var(--space-6);
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: var(--space-3);
+    top: var(--space-2);
+}

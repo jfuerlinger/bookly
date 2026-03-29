@@ -1,0 +1,72 @@
+/* --- Bottom Navigation Bar --- */
+.bottom-nav {
+    position: fixed;
+    bottom: var(--space-6);
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+}
+
+.bottom-nav-pill {
+    display: flex;
+    align-items: center;
+    justify-content: space-around;
+    width: 90%;
+    max-width: 26rem;
+    background: rgba(255, 255, 255, 0.7);
+    backdrop-filter: blur(40px);
+    -webkit-backdrop-filter: blur(40px);
+    border-radius: var(--radius-full);
+    padding: var(--space-2) var(--space-4);
+    box-shadow: var(--shadow-elevated);
+    pointer-events: auto;
+}
+
+/* --- Nav Item --- */
+.bottom-nav-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-3);
+    border-radius: var(--radius-full);
+    color: var(--color-outline);
+    text-decoration: none;
+    transition: color var(--duration-fast) var(--easing-standard),
+                background var(--duration-fast) var(--easing-standard),
+                box-shadow var(--duration-fast) var(--easing-standard),
+                transform var(--duration-fast) var(--easing-standard);
+}
+
+.bottom-nav-item:hover {
+    color: var(--color-primary);
+    opacity: 1;
+}
+
+/* Active state: gradient pill */
+::deep .bottom-nav-item.active {
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-container));
+    color: #fff;
+    box-shadow: 0 8px 24px rgba(74, 64, 224, 0.3);
+    transform: scale(1.08);
+}
+
+::deep .bottom-nav-item.active .bottom-nav-icon {
+    font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+.bottom-nav-icon {
+    font-size: 1.5rem;
+}
+
+.bottom-nav-label {
+    font-family: var(--font-headline);
+    font-weight: 600;
+    font-size: 0.625rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-top: 2px;
+}

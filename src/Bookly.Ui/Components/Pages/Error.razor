@@ -1,0 +1,32 @@
+@page "/Error"
+@using System.Diagnostics
+
+<PageTitle>Error - Bookly</PageTitle>
+
+<div class="state-container">
+    <div class="state-icon state-icon-error">
+        <span class="material-symbols-outlined" aria-hidden="true">error</span>
+    </div>
+    <h3 class="state-title">Something Went Wrong</h3>
+    <p class="state-description">
+        An error occurred while processing your request. Please try again.
+    </p>
+
+    @if (ShowRequestId)
+    {
+        <p class="error-request-id">
+            <strong>Request ID:</strong> <code>@RequestId</code>
+        </p>
+    }
+</div>
+
+@code{
+    [CascadingParameter]
+    private HttpContext? HttpContext { get; set; }
+
+    private string? RequestId { get; set; }
+    private bool ShowRequestId => !string.IsNullOrEmpty(RequestId);
+
+    protected override void OnInitialized() =>
+        RequestId = Activity.Current?.Id ?? HttpContext?.TraceIdentifier;
+}

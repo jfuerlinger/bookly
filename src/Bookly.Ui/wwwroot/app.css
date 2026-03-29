@@ -1,0 +1,655 @@
+/* ============================================================
+   Atelier Design System – Foundations & Tokens
+   ============================================================ */
+
+/* --- Google Fonts are loaded in App.razor --- */
+
+/* -------------------------------------------------------
+   1) CSS Custom Properties (Design Tokens)
+   ------------------------------------------------------- */
+:root {
+  /* --- Colors --- */
+  --color-primary: #4a40e0;
+  --color-primary-container: #9795ff;
+  --color-primary-dim: #3d30d4;
+  --color-primary-fixed: #9795ff;
+  --color-on-primary: #f4f1ff;
+  --color-on-primary-container: #14007e;
+
+  --color-secondary: #4647d3;
+  --color-secondary-container: #cdcdff;
+  --color-on-secondary: #f4f1ff;
+  --color-on-secondary-container: #2f2ebf;
+
+  --color-tertiary: #933880;
+  --color-tertiary-container: #ff95e3;
+  --color-on-tertiary: #ffeef6;
+  --color-on-tertiary-container: #650d58;
+
+  --color-error: #b41340;
+  --color-error-container: #f74b6d;
+  --color-on-error: #ffefef;
+  --color-on-error-container: #510017;
+
+  --color-surface: #f5f7f9;
+  --color-surface-bright: #f5f7f9;
+  --color-surface-dim: #d0d5d8;
+  --color-surface-container: #e5e9eb;
+  --color-surface-container-low: #eef1f3;
+  --color-surface-container-high: #dfe3e6;
+  --color-surface-container-highest: #d9dde0;
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-variant: #d9dde0;
+
+  --color-on-surface: #2c2f31;
+  --color-on-surface-variant: #595c5e;
+  --color-on-background: #2c2f31;
+  --color-background: #f5f7f9;
+
+  --color-outline: #747779;
+  --color-outline-variant: #abadaf;
+
+  --color-inverse-surface: #0b0f10;
+  --color-inverse-on-surface: #9a9d9f;
+  --color-inverse-primary: #8582ff;
+
+  /* --- Typography --- */
+  --font-headline: 'Manrope', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+  --font-label: 'Inter', system-ui, sans-serif;
+
+  --text-display-lg: 3.5rem;
+  --text-display-md: 2.75rem;
+  --text-headline-lg: 2rem;
+  --text-headline-md: 1.5rem;
+  --text-headline-sm: 1.25rem;
+  --text-body-lg: 1.125rem;
+  --text-body-md: 1rem;
+  --text-body-sm: 0.875rem;
+  --text-label-lg: 0.875rem;
+  --text-label-md: 0.75rem;
+  --text-label-sm: 0.625rem;
+
+  /* --- Spacing Scale --- */
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-10: 2.5rem;  /* 40px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+  --space-20: 5rem;    /* 80px */
+
+  /* --- Border Radius --- */
+  --radius-sm: 0.5rem;
+  --radius-md: 1rem;
+  --radius-lg: 2rem;
+  --radius-xl: 3rem;
+  --radius-full: 9999px;
+
+  /* --- Elevation / Shadows --- */
+  --shadow-ambient: 0px 20px 40px rgba(44, 47, 49, 0.06);
+  --shadow-card: 0px 20px 40px rgba(44, 47, 49, 0.04);
+  --shadow-elevated: 0px 20px 40px rgba(44, 47, 49, 0.1);
+  --shadow-primary-glow: 0px 20px 40px rgba(74, 64, 224, 0.3);
+  --shadow-none: none;
+
+  /* --- Motion --- */
+  --duration-fast: 150ms;
+  --duration-normal: 300ms;
+  --duration-slow: 500ms;
+  --easing-standard: cubic-bezier(0.4, 0, 0.2, 1);
+  --easing-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --easing-accelerate: cubic-bezier(0.4, 0, 1, 1);
+}
+
+/* --- Reduced motion --- */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* -------------------------------------------------------
+   2) Reset & Base
+   ------------------------------------------------------- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html, body {
+  font-family: var(--font-body);
+  color: var(--color-on-surface);
+  background-color: var(--color-surface);
+  line-height: 1.6;
+  min-height: 100dvh;
+}
+
+/* -------------------------------------------------------
+   3) Typography Utilities
+   ------------------------------------------------------- */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-headline);
+  font-weight: 800;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--color-on-surface);
+}
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: opacity var(--duration-fast) var(--easing-standard);
+}
+
+a:hover {
+  opacity: 0.8;
+}
+
+/* -------------------------------------------------------
+   4) Focus Styles (A11y – visible, not just color)
+   ------------------------------------------------------- */
+:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* -------------------------------------------------------
+   5) Buttons
+   ------------------------------------------------------- */
+.btn-primary-gradient {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: linear-gradient(135deg, var(--color-primary), var(--color-primary-container));
+  color: #fff;
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--text-label-lg);
+  padding: var(--space-3) var(--space-6);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  box-shadow: var(--shadow-primary-glow);
+  transition: transform var(--duration-normal) var(--easing-standard),
+              box-shadow var(--duration-normal) var(--easing-standard);
+}
+
+.btn-primary-gradient:hover {
+  transform: scale(1.02);
+  box-shadow: 0px 24px 48px rgba(74, 64, 224, 0.35);
+}
+
+.btn-primary-gradient:active {
+  transform: scale(0.95);
+}
+
+.btn-secondary-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: transparent;
+  color: var(--color-primary);
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--text-label-lg);
+  padding: var(--space-3) var(--space-6);
+  border: 1px solid transparent;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: border-color var(--duration-fast) var(--easing-standard),
+              background var(--duration-fast) var(--easing-standard);
+}
+
+.btn-secondary-ghost:hover {
+  border-color: rgba(74, 64, 224, 0.15);
+  background: rgba(74, 64, 224, 0.04);
+}
+
+.btn-destructive {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  background: transparent;
+  color: var(--color-error);
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--text-label-lg);
+  padding: var(--space-3) var(--space-6);
+  border: none;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.btn-destructive:hover {
+  background: rgba(180, 19, 64, 0.05);
+}
+
+/* -------------------------------------------------------
+   6) Input Fields
+   ------------------------------------------------------- */
+.input-atelier {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  color: var(--color-on-surface);
+  background: var(--color-surface-container-highest);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  transition: background var(--duration-fast) var(--easing-standard),
+              border-color var(--duration-fast) var(--easing-standard);
+}
+
+.input-atelier::placeholder {
+  color: var(--color-outline);
+}
+
+.input-atelier:focus {
+  outline: none;
+  background: var(--color-surface-container-lowest);
+  border-color: rgba(74, 64, 224, 0.25);
+}
+
+/* --- Search variant --- */
+.input-search {
+  width: 100%;
+  font-family: var(--font-body);
+  font-size: var(--text-body-md);
+  color: var(--color-on-surface);
+  background: var(--color-surface-container-lowest);
+  border: none;
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-4) var(--space-4) var(--space-12);
+  box-shadow: var(--shadow-ambient);
+  transition: box-shadow var(--duration-fast) var(--easing-standard);
+}
+
+.input-search::placeholder {
+  color: var(--color-outline);
+}
+
+.input-search:focus {
+  outline: none;
+  box-shadow: var(--shadow-ambient), 0 0 0 2px rgba(74, 64, 224, 0.2);
+}
+
+/* -------------------------------------------------------
+   7) Cards
+   ------------------------------------------------------- */
+.card-standard {
+  background: var(--color-surface-container-lowest);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-slow) var(--easing-standard);
+}
+
+.card-standard:hover {
+  box-shadow: var(--shadow-ambient);
+}
+
+.card-glass {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: var(--radius-lg);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-ambient);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.card-featured {
+  background: var(--color-surface-container-lowest);
+  border-radius: var(--radius-md);
+  padding: var(--space-6);
+  box-shadow: var(--shadow-card);
+  transition: box-shadow var(--duration-slow) var(--easing-standard),
+              transform var(--duration-slow) var(--easing-standard);
+}
+
+.card-featured:hover {
+  box-shadow: var(--shadow-elevated);
+}
+
+.card-metadata {
+  background: var(--color-surface-container-lowest);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+  border: 1px solid rgba(171, 173, 175, 0.1);
+}
+
+/* -------------------------------------------------------
+   8) Chips / Tags
+   ------------------------------------------------------- */
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-family: var(--font-headline);
+  font-weight: 700;
+  font-size: var(--text-label-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.chip-featured {
+  background: rgba(74, 64, 224, 0.9);
+  color: #fff;
+  backdrop-filter: blur(12px);
+}
+
+.chip-borrowed {
+  background: rgba(255, 255, 255, 0.7);
+  color: var(--color-on-surface);
+  backdrop-filter: blur(20px);
+}
+
+.chip-completed {
+  background: var(--color-secondary);
+  color: #fff;
+}
+
+.chip-wishlist {
+  background: var(--color-tertiary-container);
+  color: var(--color-on-tertiary-container);
+}
+
+.chip-filter {
+  font-family: var(--font-headline);
+  font-weight: 600;
+  font-size: var(--text-label-lg);
+  padding: var(--space-3) var(--space-8);
+  border-radius: var(--radius-full);
+  border: none;
+  cursor: pointer;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.chip-filter-active {
+  background: var(--color-primary);
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(74, 64, 224, 0.2);
+}
+
+.chip-filter-inactive {
+  background: var(--color-surface-container-high);
+  color: var(--color-on-surface-variant);
+}
+
+.chip-filter-inactive:hover {
+  background: var(--color-surface-container-highest);
+}
+
+/* -------------------------------------------------------
+   9) Shelf Progress Bar
+   ------------------------------------------------------- */
+.shelf-progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--color-surface-container-highest);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.shelf-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--color-primary), var(--color-tertiary));
+  border-radius: var(--radius-full);
+  transition: width var(--duration-slow) var(--easing-decelerate);
+}
+
+/* Thick variant for detail pages */
+.shelf-progress-track-lg {
+  height: 16px;
+}
+
+/* -------------------------------------------------------
+   10) Toggle / Switch
+   ------------------------------------------------------- */
+.toggle-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.toggle-input {
+  appearance: none;
+  width: 2.75rem;
+  height: 1.5rem;
+  background: var(--color-surface-container-highest);
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  position: relative;
+  transition: background var(--duration-fast) var(--easing-standard);
+}
+
+.toggle-input::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1.25rem;
+  height: 1.25rem;
+  background: #fff;
+  border-radius: 50%;
+  border: 1px solid var(--color-surface-container-high);
+  transition: transform var(--duration-fast) var(--easing-standard);
+}
+
+.toggle-input:checked {
+  background: var(--color-primary);
+}
+
+.toggle-input:checked::after {
+  transform: translateX(1.25rem);
+  border-color: transparent;
+}
+
+/* -------------------------------------------------------
+   11) UI States
+   ------------------------------------------------------- */
+.state-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: var(--space-16) var(--space-6);
+  gap: var(--space-4);
+}
+
+.state-icon {
+  width: 4rem;
+  height: 4rem;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+}
+
+.state-icon-empty {
+  background: var(--color-surface-container-high);
+  color: var(--color-outline);
+}
+
+.state-icon-loading {
+  background: rgba(74, 64, 224, 0.1);
+  color: var(--color-primary);
+}
+
+.state-icon-error {
+  background: rgba(180, 19, 64, 0.08);
+  color: var(--color-error);
+}
+
+.state-icon-success {
+  background: rgba(38, 176, 80, 0.1);
+  color: #26b050;
+}
+
+.state-title {
+  font-family: var(--font-headline);
+  font-size: var(--text-headline-sm);
+  font-weight: 700;
+  color: var(--color-on-surface);
+}
+
+.state-description {
+  font-size: var(--text-body-md);
+  color: var(--color-on-surface-variant);
+  max-width: 24rem;
+}
+
+/* --- Loading spinner --- */
+@keyframes atelier-spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-spinner {
+  width: 2rem;
+  height: 2rem;
+  border: 3px solid var(--color-surface-container-high);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: atelier-spin 0.8s linear infinite;
+}
+
+/* --- Success alert --- */
+.alert-success-atelier {
+  background: rgba(38, 176, 80, 0.08);
+  color: #1a7a38;
+  border: 1px solid rgba(38, 176, 80, 0.2);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-6);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* --- Error alert --- */
+.alert-error-atelier {
+  background: rgba(180, 19, 64, 0.06);
+  color: var(--color-error);
+  border: 1px solid rgba(180, 19, 64, 0.15);
+  border-radius: var(--radius-md);
+  padding: var(--space-4) var(--space-6);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+/* -------------------------------------------------------
+   12) Material Symbols icon font helper
+   ------------------------------------------------------- */
+.material-symbols-outlined {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  font-size: 24px;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: 'liga';
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* -------------------------------------------------------
+   13) Utility classes
+   ------------------------------------------------------- */
+.text-primary { color: var(--color-primary); }
+.text-tertiary { color: var(--color-tertiary); }
+.text-on-surface { color: var(--color-on-surface); }
+.text-on-surface-variant { color: var(--color-on-surface-variant); }
+.text-outline { color: var(--color-outline); }
+.text-error { color: var(--color-error); }
+
+.bg-surface { background-color: var(--color-surface); }
+.bg-surface-low { background-color: var(--color-surface-container-low); }
+.bg-surface-container { background-color: var(--color-surface-container); }
+
+.font-headline { font-family: var(--font-headline); }
+.font-body { font-family: var(--font-body); }
+
+/* -------------------------------------------------------
+   14) Blazor system overrides
+   ------------------------------------------------------- */
+.blazor-error-boundary {
+  background: var(--color-error-container);
+  color: #fff;
+  padding: var(--space-4);
+  border-radius: var(--radius-md);
+}
+
+.blazor-error-boundary::after {
+  content: "An error has occurred.";
+}
+
+#blazor-error-ui {
+  color-scheme: light only;
+  background: var(--color-surface-container-lowest);
+  bottom: 0;
+  box-shadow: var(--shadow-elevated);
+  display: none;
+  left: 0;
+  padding: var(--space-3) var(--space-6);
+  position: fixed;
+  width: 100%;
+  z-index: 1000;
+  font-family: var(--font-body);
+  color: var(--color-on-surface);
+}
+
+#blazor-error-ui .dismiss {
+  cursor: pointer;
+  position: absolute;
+  right: var(--space-3);
+  top: var(--space-2);
+}
+
+/* -------------------------------------------------------
+   15) Validation (Blazor forms)
+   ------------------------------------------------------- */
+.valid.modified:not([type=checkbox]) {
+  outline: 2px solid #26b050;
+  outline-offset: 1px;
+}
+
+.invalid {
+  outline: 2px solid var(--color-error);
+  outline-offset: 1px;
+}
+
+.validation-message {
+  color: var(--color-error);
+  font-size: var(--text-body-sm);
+  margin-top: var(--space-1);
+}

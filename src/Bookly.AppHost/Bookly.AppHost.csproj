@@ -1,0 +1,20 @@
+<Project Sdk="Aspire.AppHost.Sdk/13.2.0">
+
+  <ItemGroup>
+    <ProjectReference Include="..\Bookly.Api\Bookly.Api.csproj" />
+    <ProjectReference Include="..\Bookly.Ui\Bookly.Ui.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="13.2.0" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <UserSecretsId>ba81951e-3543-48e7-bb5c-a400eec5ec68</UserSecretsId>
+  </PropertyGroup>
+
+</Project>
