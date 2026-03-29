@@ -110,6 +110,15 @@ Diese Regeln gelten fuer das gesamte Repository, inklusive AppHost, ServiceDefau
 6. Vermeide statische globale Zustaende; bevorzuge DI.
 7. Halte Methoden kurz und single-responsibility orientiert.
 
+## NuGet Paketverwaltung (Nicht verhandelbar)
+1. Alle NuGet-Pakete werden **ausschliesslich zentral** in `Directory.Packages.props` verwaltet.
+2. `<PackageReference>`-Elemente in `.csproj`-Dateien enthalten **keine** `Version`-Attribute.
+3. Neue Pakete werden zuerst in `Directory.Packages.props` als `<PackageVersion>` eingetragen, danach als `<PackageReference>` ohne Version referenziert.
+4. Wildcard-Versionen (z. B. `10.*`) sind verboten – nur exakt gepinnte Versionen.
+5. Doppelte Paketeintraege in `Directory.Packages.props` sind verboten; Versionskonflikte zwischen Projekten sind sofort aufzuloesen.
+6. `PrivateAssets`, `IncludeAssets` und `ExcludeAssets`-Attribute verbleiben weiterhin in der jeweiligen `.csproj`, nicht in `Directory.Packages.props`.
+7. Das Aspire AppHost SDK (`Sdk="Aspire.AppHost.Sdk/..."`) ist ein MSBuild-SDK und faellt nicht unter diese Regel.
+
 ## Arbeitsmodus fuer Agents
 1. Vor jeder Aenderung:
 - Relevante Dateien, Architekturgrenzen und Risiken identifizieren.
