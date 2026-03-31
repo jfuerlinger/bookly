@@ -1,50 +1,103 @@
 @page "/add"
 @rendermode InteractiveServer
 @inject IHttpClientFactory HttpClientFactory
+@inject NavigationManager Navigation
+@using System.Net.Http.Json
 
-<PageTitle>Add - Bookly</PageTitle>
+<PageTitle>Add Book - Bookly</PageTitle>
 
 <div class="add-page">
     <header class="add-header">
-        <h2 class="add-title">Add to Collection</h2>
-        <p class="add-subtitle">Expand your curated library with a quick calculation test.</p>
+        <h2 class="add-title">Add Book Manually</h2>
+        <p class="add-subtitle">Enter book details to add it to your library.</p>
     </header>
 
     <div class="add-form-card card-glass">
-        <div class="form-group">
-            <label for="numberA" class="form-label">Number A</label>
-            <input id="numberA" type="number" class="input-atelier" @bind="NumberA" @bind:event="onchange" />
+        <div class="form-row">
+            <div class="form-group form-group-wide">
+                <label for="titleInput" class="form-label">Title *</label>
+                <input id="titleInput" type="text" class="input-atelier" placeholder="Book title"
+                       @bind="Title" @bind:event="onchange" />
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="numberB" class="form-label">Number B</label>
-            <input id="numberB" type="number" class="input-atelier" @bind="NumberB" @bind:event="onchange" />
+        <div class="form-row">
+            <div class="form-group form-group-wide">
+                <label for="subtitleInput" class="form-label">Subtitle</label>
+                <input id="subtitleInput" type="text" class="input-atelier" placeholder="Optional subtitle"
+                       @bind="Subtitle" @bind:event="onchange" />
+            </div>
         </div>
 
-        <button class="btn-primary-gradient add-submit-btn" @onclick="Calculate" id="calculateBtn">
-            <span class="material-symbols-outlined" aria-hidden="true">calculate</span>
-            Calculate
-        </button>
+        <div class="form-row">
+            <div class="form-group form-group-wide">
+                <label for="authorsInput" class="form-label">Authors</label>
+                <input id="authorsInput" type="text" class="input-atelier" placeholder="Comma-separated authors"
+                       @bind="Authors" @bind:event="onchange" />
+            </div>
+        </div>
+
+        <div class="form-row form-row-2col">
+            <div class="form-group">
+                <label for="isbnInput" class="form-label">ISBN *</label>
+                <input id="isbnInput" type="text" class="input-atelier" placeholder="978-3-16-148410-0"
+                       @bind="Isbn" @bind:event="onchange" />
+            </div>
+            <div class="form-group">
+                <label for="pagesInput" class="form-label">Pages</label>
+                <input id="pagesInput" type="number" class="input-atelier" placeholder="340"
+                       @bind="PageCount" @bind:event="onchange" />
+            </div>
+        </div>
+
+        <div class="form-row form-row-2col">
+            <div class="form-group">
+                <label for="publisherInput" class="form-label">Publisher</label>
+                <input id="publisherInput" type="text" class="input-atelier" placeholder="Publisher name"
+                       @bind="Publisher" @bind:event="onchange" />
+            </div>
+            <div class="form-group">
+                <label for="languageInput" class="form-label">Language</label>
+                <input id="languageInput" type="text" class="input-atelier" placeholder="e.g. English"
+                       @bind="Language" @bind:event="onchange" />
+            </div>
+        </div>
+
+        <div class="form-row">
+            <div class="form-group form-group-wide">
+                <label for="descriptionInput" class="form-label">Description</label>
+                <textarea id="descriptionInput" class="input-atelier input-textarea"
+                          placeholder="Brief description of the book..."
+                          @bind="Description" @bind:event="onchange" rows="4"></textarea>
+            </div>
+        </div>
+
+        <div class="form-actions">
+            <button class="btn-primary-gradient add-submit-btn" @onclick="SubmitAsync" disabled="@IsLoading">
+                <span class="material-symbols-outlined" aria-hidden="true">add_circle</span>
+                Add to Library
+            </button>
+        </div>
 
         @if (IsLoading)
         {
             <div class="state-container" role="status">
                 <div class="loading-spinner"></div>
-                <p class="state-description">Calculating...</p>
+                <p class="state-description">Adding book...</p>
             </div>
         }
 
-        @if (Result is not null)
+        @if (SuccessMessage is not null)
         {
-            <div class="alert-success-atelier" id="result" role="status">
+            <div class="alert-success-atelier" role="status">
                 <span class="material-symbols-outlined" aria-hidden="true">check_circle</span>
-                Result: @Result
+                @SuccessMessage
             </div>
         }
 
         @if (Error is not null)
         {
-            <div class="alert-error-atelier" id="error" role="alert">
+            <div class="alert-error-atelier" role="alert">
                 <span class="material-symbols-outlined" aria-hidden="true">error</span>
                 @Error
             </div>
@@ -53,29 +106,57 @@
 </div>
 
 @code {
-    private int NumberA { get; set; }
-    private int NumberB { get; set; }
-    private int? Result { get; set; }
+    private string? Title { get; set; }
+    private string? Subtitle { get; set; }
+    private string? Authors { get; set; }
+    private string? Isbn { get; set; }
+    private int? PageCount { get; set; }
+    private string? Publisher { get; set; }
+    private string? Language { get; set; }
+    private string? Description { get; set; }
+    private string? SuccessMessage { get; set; }
     private string? Error { get; set; }
     private bool IsLoading { get; set; }
 
-    private async Task Calculate()
+    private async Task SubmitAsync()
     {
+        Error = null;
+        SuccessMessage = null;
+
+        if (string.IsNullOrWhiteSpace(Title))
+        {
+            Error = "Please enter a book title.";
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(Isbn))
+        {
+            Error = "Please enter an ISBN.";
+            return;
+        }
+
         try
         {
-            Error = null;
-            Result = null;
             IsLoading = true;
             StateHasChanged();
 
             var client = HttpClientFactory.CreateClient("BooklyApi");
-            var response = await client.GetFromJsonAsync<AddResponse>($"/api/add?a={NumberA}&b={NumberB}");
-            Result = response?.Result;
+            var response = await client.PostAsJsonAsync("/api/library/isbn-scan",
+                new { isbn = Isbn });
+
+            if (response.IsSuccessStatusCode)
+            {
+                SuccessMessage = $"\"{Title}\" has been added to your library!";
+                ResetForm();
+            }
+            else
+            {
+                Error = "Could not add this book. The ISBN may already exist or is invalid.";
+            }
         }
         catch (Exception ex)
         {
-            Error = $"Error calling API: {ex.Message}";
-            Result = null;
+            Error = $"Could not reach the server: {ex.Message}";
         }
         finally
         {
@@ -83,5 +164,15 @@
         }
     }
 
-    private record AddResponse(int Result);
+    private void ResetForm()
+    {
+        Title = null;
+        Subtitle = null;
+        Authors = null;
+        Isbn = null;
+        PageCount = null;
+        Publisher = null;
+        Language = null;
+        Description = null;
+    }
 }

@@ -1,147 +1,177 @@
 @page "/book/{Id:int}"
+@inject IHttpClientFactory HttpClientFactory
+@using System.Net.Http.Json
 
-<PageTitle>Book Details - Bookly</PageTitle>
+<PageTitle>@(_book?.Title ?? "Book Details") - Bookly</PageTitle>
 
 <div class="detail-page">
-    <!-- Hero Section -->
-    <section class="detail-hero">
-        <div class="detail-hero-bg">
-            <div class="detail-hero-gradient"></div>
+    @if (_isLoading)
+    {
+        <div class="detail-loading">
+            <div class="loading-spinner"></div>
+            <p class="state-description">Loading book details...</p>
         </div>
-        <div class="detail-hero-content">
-            <div class="detail-cover">
-                <div class="detail-cover-placeholder">
-                    <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
-                </div>
-            </div>
-            <div class="detail-hero-info">
-                <span class="chip chip-wishlist">Curator's Choice</span>
-                <h1 class="detail-title">Echoes of Infinity</h1>
-                <p class="detail-author">by Dr. Alistair Thorne</p>
-            </div>
+    }
+    else if (_errorMessage is not null)
+    {
+        <div class="detail-error">
+            <span class="material-symbols-outlined" aria-hidden="true">error_outline</span>
+            <p>@_errorMessage</p>
         </div>
-    </section>
-
-    <div class="detail-grid">
-        <!-- Left Column -->
-        <div class="detail-main">
-            <!-- Progress Card -->
-            <div class="card-glass detail-progress-card">
-                <div class="progress-header">
-                    <h3 class="progress-card-title">Reading Progress</h3>
-                    <span class="progress-percent">64%</span>
+    }
+    else if (_book is not null)
+    {
+        <!-- Hero Section -->
+        <section class="detail-hero">
+            <div class="detail-hero-bg">
+                <div class="detail-hero-gradient"></div>
+            </div>
+            <div class="detail-hero-content">
+                <div class="detail-cover">
+                    @{
+                        var coverUrl = _book.CoverLargeUrl ?? _book.CoverMediumUrl ?? _book.CoverSmallUrl;
+                    }
+                    @if (coverUrl is not null)
+                    {
+                        <img src="@coverUrl" alt="Cover of @_book.Title" class="detail-cover-image" />
+                    }
+                    else
+                    {
+                        <div class="detail-cover-placeholder">
+                            <span class="material-symbols-outlined" aria-hidden="true">menu_book</span>
+                        </div>
+                    }
                 </div>
-                <div class="shelf-progress-track shelf-progress-track-lg">
-                    <div class="shelf-progress-fill" style="width: 64%;"></div>
-                </div>
-                <div class="progress-meta">
-                    <span>Page 218 of 340</span>
-                    <span>12 days left at current pace</span>
+                <div class="detail-hero-info">
+                    <h1 class="detail-title">@_book.Title</h1>
+                    @if (_book.Subtitle is not null)
+                    {
+                        <p class="detail-subtitle">@_book.Subtitle</p>
+                    }
+                    @if (_book.Authors.Count > 0)
+                    {
+                        <p class="detail-author">by @string.Join(", ", _book.Authors)</p>
+                    }
                 </div>
             </div>
+        </section>
 
-            <!-- Toggles -->
-            <div class="toggle-grid">
-                <div class="toggle-card">
-                    <div class="toggle-card-left">
-                        <div class="toggle-icon-circle toggle-icon-primary">
-                            <span class="material-symbols-outlined" aria-hidden="true">sync_alt</span>
-                        </div>
-                        <div>
-                            <p class="toggle-label">Mark as Borrowed</p>
-                            <p class="toggle-sublabel">Track external lending</p>
-                        </div>
-                    </div>
-                    <label class="toggle-wrapper">
-                        <input type="checkbox" class="toggle-input" aria-label="Mark as borrowed" />
-                    </label>
-                </div>
-
-                <div class="toggle-card">
-                    <div class="toggle-card-left">
-                        <div class="toggle-icon-circle toggle-icon-tertiary">
-                            <span class="material-symbols-outlined" aria-hidden="true">public</span>
-                        </div>
-                        <div>
-                            <p class="toggle-label">Make Public</p>
-                            <p class="toggle-sublabel">Visible in community feed</p>
-                        </div>
-                    </div>
-                    <label class="toggle-wrapper">
-                        <input type="checkbox" class="toggle-input" checked aria-label="Make public" />
-                    </label>
-                </div>
+        <div class="detail-grid">
+            <!-- Left Column -->
+            <div class="detail-main">
+                <!-- Description -->
+                @if (_book.Description is not null)
+                {
+                    <section class="synopsis-section">
+                        <h3 class="synopsis-title">About this book</h3>
+                        <p class="synopsis-text">@_book.Description</p>
+                    </section>
+                }
             </div>
 
-            <!-- Synopsis -->
-            <section class="synopsis-section">
-                <h3 class="synopsis-title">Synopsis</h3>
-                <p class="synopsis-text">
-                    In a world where memories are traded like currency, a young archivist uncovers a
-                    series of encrypted journals that shouldn't exist. "Echoes of Infinity" explores the
-                    delicate intersection of technology and human soul, weaving a narrative that
-                    challenges the very definition of legacy.
-                </p>
-                <p class="synopsis-text">
-                    Dr. Thorne's latest masterpiece is a sprawling epic of speculative fiction, praised
-                    for its intricate world-building and the emotional resonance of its characters. A
-                    must-read for anyone fascinated by the future of human consciousness.
-                </p>
-            </section>
+            <!-- Right Column: Metadata -->
+            <aside class="detail-sidebar">
+                <div class="card-metadata">
+                    <h4 class="metadata-heading">Book Details</h4>
+                    <dl class="metadata-list">
+                        @if (_book.Isbn13 is not null)
+                        {
+                            <div class="metadata-row">
+                                <dt>ISBN-13</dt>
+                                <dd class="metadata-mono">@_book.Isbn13</dd>
+                            </div>
+                        }
+                        else if (_book.Isbn10 is not null)
+                        {
+                            <div class="metadata-row">
+                                <dt>ISBN-10</dt>
+                                <dd class="metadata-mono">@_book.Isbn10</dd>
+                            </div>
+                        }
+                        @if (_book.PageCount is not null)
+                        {
+                            <div class="metadata-row">
+                                <dt>Pages</dt>
+                                <dd>@_book.PageCount</dd>
+                            </div>
+                        }
+                        @if (_book.Publisher is not null)
+                        {
+                            <div class="metadata-row">
+                                <dt>Publisher</dt>
+                                <dd>@_book.Publisher</dd>
+                            </div>
+                        }
+                        @if (_book.Language is not null)
+                        {
+                            <div class="metadata-row">
+                                <dt>Language</dt>
+                                <dd>@_book.Language</dd>
+                            </div>
+                        }
+                        <div class="metadata-row">
+                            <dt>Source</dt>
+                            <dd class="text-primary">@_book.MetadataSource</dd>
+                        </div>
+                        <div class="metadata-row">
+                            <dt>Added</dt>
+                            <dd>@_book.CreatedAtUtc.ToString("MMM d, yyyy")</dd>
+                        </div>
+                    </dl>
+                </div>
+            </aside>
         </div>
-
-        <!-- Right Column: Metadata -->
-        <aside class="detail-sidebar">
-            <div class="card-metadata">
-                <h4 class="metadata-heading">Metadata Details</h4>
-                <dl class="metadata-list">
-                    <div class="metadata-row">
-                        <dt>ISBN-13</dt>
-                        <dd class="metadata-mono">978-3-16-148410-0</dd>
-                    </div>
-                    <div class="metadata-row">
-                        <dt>Pages</dt>
-                        <dd>340</dd>
-                    </div>
-                    <div class="metadata-row">
-                        <dt>Published</dt>
-                        <dd>Oct 24, 2023</dd>
-                    </div>
-                    <div class="metadata-row">
-                        <dt>Genre</dt>
-                        <dd class="text-primary">Speculative Fiction</dd>
-                    </div>
-                    <div class="metadata-row">
-                        <dt>Language</dt>
-                        <dd>English (UK)</dd>
-                    </div>
-                </dl>
-
-                <div class="metadata-actions">
-                    <button class="btn-primary-gradient metadata-action-btn">
-                        <span class="material-symbols-outlined" aria-hidden="true">edit</span>
-                        Edit Entry
-                    </button>
-                    <button class="btn-destructive metadata-action-btn">
-                        Archive Book
-                    </button>
-                </div>
-            </div>
-
-            <!-- Tags -->
-            <div class="tags-section">
-                <h4 class="metadata-heading">Collections</h4>
-                <div class="tags-list">
-                    <span class="tag-chip">Sci-Fi Favorites</span>
-                    <span class="tag-chip">2024 Reading List</span>
-                    <span class="tag-chip">Hardcover</span>
-                </div>
-            </div>
-        </aside>
-    </div>
+    }
 </div>
 
 @code {
     [Parameter]
     public int Id { get; set; }
+
+    private BookDto? _book;
+    private bool _isLoading = true;
+    private string? _errorMessage;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var client = HttpClientFactory.CreateClient("BooklyApi");
+            var books = await client.GetFromJsonAsync<List<BookDto>>("/api/library/books") ?? [];
+            _book = books.FirstOrDefault(b => b.Id == Id);
+            if (_book is null)
+            {
+                _errorMessage = "Book not found.";
+            }
+        }
+        catch (Exception)
+        {
+            _errorMessage = "Could not load book details. Please try again later.";
+        }
+        finally
+        {
+            _isLoading = false;
+        }
+    }
+
+    private sealed record BookDto
+    {
+        public int Id { get; init; }
+        public string? Isbn10 { get; init; }
+        public string? Isbn13 { get; init; }
+        public required string NormalizedIsbn { get; init; }
+        public required string Title { get; init; }
+        public string? Subtitle { get; init; }
+        public List<string> Authors { get; init; } = [];
+        public string? Publisher { get; init; }
+        public string? Language { get; init; }
+        public int? PageCount { get; init; }
+        public string? Description { get; init; }
+        public string? CoverSmallUrl { get; init; }
+        public string? CoverMediumUrl { get; init; }
+        public string? CoverLargeUrl { get; init; }
+        public required string MetadataSource { get; init; }
+        public DateTime CreatedAtUtc { get; init; }
+        public DateTime UpdatedAtUtc { get; init; }
+    }
 }

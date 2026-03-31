@@ -198,6 +198,13 @@ a:hover {
   transform: scale(0.95);
 }
 
+.btn-primary-gradient:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
 .btn-secondary-ghost {
   display: inline-flex;
   align-items: center;
@@ -266,6 +273,22 @@ a:hover {
   outline: none;
   background: var(--color-surface-container-lowest);
   border-color: rgba(74, 64, 224, 0.25);
+}
+
+.input-atelier:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Hide number input spinners for cleaner look */
+.input-atelier[type="number"]::-webkit-inner-spin-button,
+.input-atelier[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.input-atelier[type="number"] {
+  -moz-appearance: textfield;
 }
 
 /* --- Search variant --- */

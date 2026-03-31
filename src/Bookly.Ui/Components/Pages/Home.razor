@@ -63,31 +63,34 @@
             @foreach (var book in _books)
             {
                 var preferredCoverUrl = GetPreferredCoverUrl(book);
+                var placeholderClass = GetPlaceholderClass(book.Id);
 
-                <article class="card-standard book-card">
-                    <div class="book-cover">
-                        @if (preferredCoverUrl is not null)
-                        {
-                            <img src="@preferredCoverUrl"
-                                 alt="Cover of @book.Title"
-                                 class="book-cover-image"
-                                 loading="lazy" />
-                        }
-                        else
-                        {
-                            <div class="book-cover-placeholder">
-                                <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
-                            </div>
-                        }
-                    </div>
-                    <div class="book-info">
-                        <h4 class="book-title">@book.Title</h4>
-                        @if (book.Authors.Count > 0)
-                        {
-                            <p class="book-author">@string.Join(", ", book.Authors)</p>
-                        }
-                    </div>
-                </article>
+                <a href="@($"book/{book.Id}")" class="book-card-link">
+                    <article class="card-standard book-card">
+                        <div class="book-cover">
+                            @if (preferredCoverUrl is not null)
+                            {
+                                <img src="@preferredCoverUrl"
+                                     alt="Cover of @book.Title"
+                                     class="book-cover-image"
+                                     loading="lazy" />
+                            }
+                            else
+                            {
+                                <div class="book-cover-placeholder @placeholderClass">
+                                    <span class="material-symbols-outlined" aria-hidden="true">auto_stories</span>
+                                </div>
+                            }
+                        </div>
+                        <div class="book-info">
+                            <h4 class="book-title">@book.Title</h4>
+                            @if (book.Authors.Count > 0)
+                            {
+                                <p class="book-author">@string.Join(", ", book.Authors)</p>
+                            }
+                        </div>
+                    </article>
+                </a>
             }
         }
     </section>
@@ -134,6 +137,18 @@
         public required string MetadataSource { get; init; }
         public DateTime CreatedAtUtc { get; init; }
         public DateTime UpdatedAtUtc { get; init; }
+    }
+
+    private static string GetPlaceholderClass(int id)
+    {
+        return (id % 4) switch
+        {
+            0 => "cover-warm",
+            1 => "cover-cool",
+            2 => "cover-dark",
+            3 => "cover-nature",
+            _ => "cover-warm"
+        };
     }
 
     private static string? GetPreferredCoverUrl(BookDto book)

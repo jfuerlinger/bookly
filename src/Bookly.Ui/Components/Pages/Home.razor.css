@@ -198,11 +198,26 @@
     opacity: 1;
 }
 
+/* --- Book Card Link Wrapper --- */
+.book-card-link {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    border-radius: var(--radius-md);
+    transition: transform var(--duration-normal) var(--easing-standard);
+}
+
+.book-card-link:hover {
+    transform: translateY(-4px);
+    opacity: 1;
+}
+
 /* --- Standard Book Cards --- */
 .book-card {
     display: flex;
     flex-direction: column;
     gap: var(--space-6);
+    cursor: pointer;
 }
 
 .book-cover {
@@ -300,4 +315,45 @@
 .featured-cover .book-cover-placeholder .material-symbols-outlined {
     font-size: 4rem;
     opacity: 0.3;
+}
+
+/* --- Loading / Empty / Error states --- */
+.loading-state,
+.error-state,
+.empty-state {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: var(--space-16) var(--space-6);
+    gap: var(--space-4);
+    color: var(--color-on-surface-variant);
+}
+
+.loading-state .material-symbols-outlined,
+.error-state .material-symbols-outlined,
+.empty-state .material-symbols-outlined {
+    font-size: 3rem;
+    opacity: 0.4;
+}
+
+.error-state .material-symbols-outlined {
+    color: var(--color-error);
+    opacity: 0.6;
+}
+
+.error-state p {
+    color: var(--color-error);
+}
+
+@keyframes pulse-icon {
+    0%, 100% { opacity: 0.3; }
+    50% { opacity: 0.6; }
+}
+
+.loading-state .material-symbols-outlined {
+    animation: pulse-icon 1.5s ease-in-out infinite;
+    color: var(--color-primary);
 }
