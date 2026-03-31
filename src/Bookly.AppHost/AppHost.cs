@@ -1,5 +1,8 @@
 var builder = DistributedApplication.CreateBuilder(args);
 
+// Add the following line to configure the Docker Compose environment
+builder.AddDockerComposeEnvironment("env");
+
 var postgres = builder.AddPostgres("postgres")
     .WithLifetime(ContainerLifetime.Persistent)
     .WithDataVolume("bookly-postgres-data");
@@ -17,6 +20,7 @@ var api = builder.AddProject<Projects.Bookly_Api>("bookly-api")
 
 var ui = builder.AddProject<Projects.Bookly_Ui>("bookly-ui")
     .WithReference(api)
+    .WithExternalHttpEndpoints()
     .WaitFor(api);
 
 // Dev Tunnel (opt-in): expose bookly-ui externally via Microsoft Dev Tunnels CLI.

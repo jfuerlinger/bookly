@@ -1,0 +1,76 @@
+services:
+  env-dashboard:
+    image: "mcr.microsoft.com/dotnet/nightly/aspire-dashboard:latest"
+    ports:
+      - "18888"
+    expose:
+      - "18889"
+      - "18890"
+    networks:
+      - "aspire"
+    restart: "always"
+  postgres:
+    image: "docker.io/library/postgres:17.6"
+    environment:
+      POSTGRES_HOST_AUTH_METHOD: "scram-sha-256"
+      POSTGRES_INITDB_ARGS: "--auth-host=scram-sha-256 --auth-local=scram-sha-256"
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+    expose:
+      - "5432"
+    volumes:
+      - type: "volume"
+        target: "/var/lib/postgresql/data"
+        source: "bookly-postgres-data"
+        read_only: false
+    networks:
+      - "aspire"
+  bookly-api:
+    image: "${BOOKLY_API_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${BOOKLY_API_PORT}"
+      ConnectionStrings__booklydb: "Host=postgres;Port=5432;Username=postgres;Password=${POSTGRES_PASSWORD};Database=bookly"
+      BOOKLYDB_HOST: "postgres"
+      BOOKLYDB_PORT: "5432"
+      BOOKLYDB_USERNAME: "postgres"
+      BOOKLYDB_PASSWORD: "${POSTGRES_PASSWORD}"
+      BOOKLYDB_URI: "postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/bookly"
+      BOOKLYDB_JDBCCONNECTIONSTRING: "jdbc:postgresql://postgres:5432/bookly"
+      BOOKLYDB_DATABASENAME: "bookly"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "bookly-api"
+    expose:
+      - "${BOOKLY_API_PORT}"
+    depends_on:
+      postgres:
+        condition: "service_started"
+    networks:
+      - "aspire"
+  bookly-ui:
+    image: "${BOOKLY_UI_IMAGE}"
+    environment:
+      OTEL_DOTNET_EXPERIMENTAL_OTLP_RETRY: "in_memory"
+      ASPNETCORE_FORWARDEDHEADERS_ENABLED: "true"
+      HTTP_PORTS: "${BOOKLY_UI_PORT}"
+      BOOKLY_API_HTTP: "http://bookly-api:${BOOKLY_API_PORT}"
+      services__bookly-api__http__0: "http://bookly-api:${BOOKLY_API_PORT}"
+      BOOKLY_API_HTTPS: "https://bookly-api:${BOOKLY_API_PORT}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "http://env-dashboard:18889"
+      OTEL_EXPORTER_OTLP_PROTOCOL: "grpc"
+      OTEL_SERVICE_NAME: "bookly-ui"
+    ports:
+      - "${BOOKLY_UI_PORT}"
+    depends_on:
+      bookly-api:
+        condition: "service_started"
+    networks:
+      - "aspire"
+networks:
+  aspire:
+    driver: "bridge"
+volumes:
+  bookly-postgres-data:
+    driver: "local"
