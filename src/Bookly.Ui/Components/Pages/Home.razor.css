@@ -214,6 +214,14 @@
     transition: box-shadow var(--duration-slow) var(--easing-standard);
 }
 
+.book-cover-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+}
+
 .book-card:hover .book-cover {
     box-shadow: 0 16px 40px rgba(44, 47, 49, 0.14);
 }

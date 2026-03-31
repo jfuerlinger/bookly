@@ -62,11 +62,13 @@
         {
             @foreach (var book in _books)
             {
+                var preferredCoverUrl = GetPreferredCoverUrl(book);
+
                 <article class="card-standard book-card">
                     <div class="book-cover">
-                        @if (book.CoverMediumUrl is not null)
+                        @if (preferredCoverUrl is not null)
                         {
-                            <img src="@book.CoverMediumUrl"
+                            <img src="@preferredCoverUrl"
                                  alt="Cover of @book.Title"
                                  class="book-cover-image"
                                  loading="lazy" />
@@ -132,6 +134,17 @@
         public required string MetadataSource { get; init; }
         public DateTime CreatedAtUtc { get; init; }
         public DateTime UpdatedAtUtc { get; init; }
+    }
+
+    private static string? GetPreferredCoverUrl(BookDto book)
+    {
+        var candidate = book.CoverMediumUrl ?? book.CoverLargeUrl ?? book.CoverSmallUrl;
+        if (string.IsNullOrWhiteSpace(candidate))
+            return null;
+
+        return candidate.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            ? $"https://{candidate[7..]}"
+            : candidate;
     }
 }
 

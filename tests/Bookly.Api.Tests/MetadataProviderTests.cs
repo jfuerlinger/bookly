@@ -67,6 +67,36 @@ public class OpenLibraryProviderTests
 
         Assert.Null(result);
     }
+
+    [Fact]
+    public async Task LookupAsync_HttpCoverUrls_NormalizesToHttps()
+    {
+        var isbn = "9780140449136";
+        var json = JsonSerializer.Serialize(new Dictionary<string, object>
+        {
+            [$"ISBN:{isbn}"] = new
+            {
+                title = "The Republic",
+                cover = new
+                {
+                    small = "http://covers.openlibrary.org/s.jpg",
+                    medium = "http://covers.openlibrary.org/m.jpg",
+                    large = "http://covers.openlibrary.org/l.jpg"
+                }
+            }
+        });
+
+        var handler = new FakeHttpHandler(json);
+        var httpClient = new HttpClient(handler) { BaseAddress = new Uri("https://openlibrary.org") };
+        var provider = new OpenLibraryProvider(httpClient, NullLogger<OpenLibraryProvider>.Instance);
+
+        var result = await provider.LookupAsync(isbn);
+
+        Assert.NotNull(result);
+        Assert.Equal("https://covers.openlibrary.org/s.jpg", result.CoverSmallUrl);
+        Assert.Equal("https://covers.openlibrary.org/m.jpg", result.CoverMediumUrl);
+        Assert.Equal("https://covers.openlibrary.org/l.jpg", result.CoverLargeUrl);
+    }
 }
 
 public class GoogleBooksProviderTests

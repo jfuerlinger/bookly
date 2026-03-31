@@ -1,0 +1,5 @@
+{
+  "appHost": {
+    "path": "src/Bookly.AppHost/Bookly.AppHost.csproj"
+  }
+}

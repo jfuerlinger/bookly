@@ -52,9 +52,9 @@ public sealed class OpenLibraryProvider(
         string? coverSmall = null, coverMedium = null, coverLarge = null;
         if (book.TryGetProperty("cover", out var cover))
         {
-            coverSmall = cover.GetPropertyOrDefault("small");
-            coverMedium = cover.GetPropertyOrDefault("medium");
-            coverLarge = cover.GetPropertyOrDefault("large");
+            coverSmall = NormalizeToHttps(cover.GetPropertyOrDefault("small"));
+            coverMedium = NormalizeToHttps(cover.GetPropertyOrDefault("medium"));
+            coverLarge = NormalizeToHttps(cover.GetPropertyOrDefault("large"));
         }
 
         // Try to extract ISBN-10 and ISBN-13 from identifiers
@@ -138,6 +138,16 @@ public sealed class OpenLibraryProvider(
                 return date;
         }
         return null;
+    }
+
+    private static string? NormalizeToHttps(string? url)
+    {
+        if (string.IsNullOrWhiteSpace(url))
+            return null;
+
+        return url.StartsWith("http://", StringComparison.OrdinalIgnoreCase)
+            ? $"https://{url[7..]}"
+            : url;
     }
 }
 

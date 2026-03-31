@@ -15,9 +15,19 @@ var api = builder.AddProject<Projects.Bookly_Api>("bookly-api")
     .WithReference(booklyDatabase)
     .WaitFor(booklyDatabase);
 
-builder.AddProject<Projects.Bookly_Ui>("bookly-ui")
+var ui = builder.AddProject<Projects.Bookly_Ui>("bookly-ui")
     .WithReference(api)
     .WaitFor(api);
+
+// Dev Tunnel (opt-in): expose bookly-ui externally via Microsoft Dev Tunnels CLI.
+// Activate by setting DevTunnel:Enabled=true in user secrets or appsettings.Development.json.
+// Prerequisite: install devtunnel CLI and run `devtunnel login` once.
+if (builder.Configuration["DevTunnel:Enabled"] == "true")
+{
+    builder.AddExecutable("dev-tunnel", "devtunnel", ".",
+            "host", "--allow-anonymous", "-p", "5044")
+        .WaitFor(ui);
+}
 
 // Bookly.Cli is a standalone console app, not an Aspire service.
 // Run it separately: dotnet run --project src/Bookly.Cli -- add 3 5
